@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <title>{% block title %}Музыкальный блог{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'style.css' %}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Electrolize&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="desktop">
+        <header class="header">
+            <img class="rectangle-2" src="{% static 'Rectangle 18.svg' %}" alt="Header background" />
+
+            <div class="logo-wrapper div">
+                <div class="logo-icons">
+                    <img class="streamline-flex" src="{% static 'streamline-flex_music-equalizer-solid.svg' %}" alt="" />
+                    <img class="streamline-flex-2" src="{% static 'streamline-flex_music-equalizer-solid.svg' %}" alt="" />
+                    <img class="streamline-flex-3" src="{% static 'streamline-flex_music-equalizer-solid.svg' %}" alt="" />
+                </div>
+                <span class="text-wrapper-4">Музыкальный<br>блог</span>
+            </div>
+
+            <nav class="main-nav">
+                <a href="/tracks/" class="nav-link">
+                    <img src="{% static 'tdesign_tree-catalog-filled.svg' %}" alt="" />
+                    <span class="text-wrapper">Все треки</span>
+                </a>
+                <a href="/tracks/new/" class="nav-link">
+                    <img src="{% static 'entrypo_new.svg' %}" alt="" />
+                    <span class="text-wrapper-2">Новые треки</span>
+                </a>
+                <a href="/tracks/week/" class="nav-link">
+                    <img src="{% static 'ix_calendar.svg' %}" alt="" />
+                    <span class="text-wrapper-3">Треки недели</span>
+                </a>
+                {% if request.session.user_role == 'admin' %}
+			<a href="/moderation/" class="nav-link" style="margin-left: 20px;">
+  			  <span class="text-wrapper" style="color: #FF11D3;"> Модерация</span>
+			</a>
+                {% endif %}
+            </nav>
+
+            <div class="search-container">
+                <img class="search-icon" src="{% static 'material-symbols_search.svg' %}" alt="Поиск" />
+                <input type="text" class="search-input" id="searchInput" placeholder="Поиск" />
+            </div>
+
+            <aside class="user-panel rectangle-4">
+                <div class="ellipse"></div>
+                <a href="/profile/">
+                    <img class="user" src="{% static 'User.svg' %}" alt="Профиль" />
+                </a>
+                <div class="rectangle-5">
+                    <a href="/upload/">
+                        <img class="cloud-icon" src="{% static 'Vector.svg' %}" alt="Облако" />
+                    </a>
+                </div>
+            </aside>
+        </header>
+
+        <main>
+            {% if messages %}
+                {% for message in messages %}
+                    <div style="text-align:center; padding:10px; margin:10px auto; background:#FF11D3; color:white; border-radius:10px; max-width:500px;">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            {% block content %}{% endblock %}
+        </main>
+
+        <footer class="site-footer">
+            <img class="img" src="{% static 'Rectangle 18.svg' %}" alt="Footer background" />
+            <div class="footer-container">
+                <div class="footer-logo rectangle-6">
+                    <div class="footer-logo_icons">
+                        <img class="streamline-flex-4" src="{% static 'streamline-flex_music-equalizer-solid.svg' %}" alt="" />
+                        <img class="streamline-flex-5" src="{% static 'streamline-flex_music-equalizer-solid.svg' %}" alt="" />
+                        <img class="streamline-flex-6" src="{% static 'streamline-flex_music-equalizer-solid.svg' %}" alt="" />
+                    </div>
+                    <span class="text-wrapper-22">Музыкальный<br />Блог</span>
+                </div>
+                <div class="footer-nav-wrapper">
+                    <nav class="footer-nav">
+                        <a href="/tracks/" class="footer-nav-link">Все треки</a>
+                        <a href="/" class="footer-nav-link">Главная страница</a>
+                        {% if not request.session.user_id %}
+                        <a href="/login/" class="footer-nav-link">Вход</a>
+                        <a href="/register/" class="footer-nav-link">Регистрация</a>
+                        {% else %}
+                        <a href="/profile/" class="footer-nav-link">Профиль</a>
+                        <a href="/logout/" class="footer-nav-link">Выход</a>
+                        {% endif %}
+                    </nav>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Поиск на странице
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', function(e) {
+                const term = e.target.value.toLowerCase();
+                document.querySelectorAll('.track-item, .featured-card, .track-item-row, .small-featured-card').forEach(item => {
+                    const name = item.querySelector('.track-name')?.textContent.toLowerCase() || '';
+                    const artist = item.querySelector('.artist-name')?.textContent.toLowerCase() || '';
+                    item.style.display = (name.includes(term) || artist.includes(term) || !term) ? '' : 'none';
+                    if (item.classList.contains('track-item') && item.style.display !== 'none') item.style.display = 'flex';
+                });
+            });
+        }
+        
+        // Логотип на главную
+        const logo = document.querySelector('.div');
+        if (logo) {
+            logo.addEventListener('click', () => window.location.href = '/');
+        }
+        
+        const footerLogo = document.querySelector('.footer-logo');
+        if (footerLogo) {
+            footerLogo.addEventListener('click', () => window.location.href = '/');
+        }
+        
+        // Показываем уведомление о воспроизведении (если нужно)
+        function showPlayNotification(trackName, artistName) {
+            const notification = document.createElement('div');
+            notification.className = 'play-notification';
+            notification.textContent = ` Воспроизводится: ${trackName} - ${artistName}`;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => notification.classList.add('show'), 10);
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
+            }, 2000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Публикация трека - Музыкальный блог{% endblock %}
+
+{% block content %}
+<div class="auth-page-content">
+    <div class="auth-box upload-box">
+        <h1 class="auth-title">Публикация трека</h1>
+        
+        <form method="POST" action="/upload/" enctype="multipart/form-data" class="auth-form">
+            {% csrf_token %}
+            <input type="text" class="auth-input" name="track_name" placeholder="Название трека" required>
+            <input type="text" class="auth-input" name="artist_name" placeholder="Имя автора" required>
+            
+            <select class="auth-input auth-select" name="genre" required>
+                <option value="" disabled selected>Выберите жанр</option>
+                {% for genre in genres %}
+                <option value="{{ genre.genre_id }}">{{ genre.name }}</option>
+                {% endfor %}
+            </select>
+
+            <textarea class="auth-input auth-textarea" name="description" placeholder="Описание трека" rows="5"></textarea>
+            
+            <!-- Поле для загрузки аудиофайла -->
+            <div class="file-upload-zone" id="drop-zone">
+                <input type="file" name="audio_file" id="file-input" class="hidden-file-input" accept="audio/*" required>
+                <label for="file-input" class="file-label">
+                    <img src="{% static 'entypo_new (1).svg' %}" alt="Upload" class="upload-icon-large">
+                    <span class="upload-text">Выберите файл или перетащите его сюда</span>
+                    <span class="file-name-display" id="file-name">Файл не выбран</span>
+                </label>
+            </div>
+            
+            <button type="submit" class="auth-submit">Опубликовать</button>
+        </form>
+    </div>
+</div>
+
+<style>
+.auth-page-content { max-width: 1200px; margin: 160px auto 100px; padding: 0 40px; display: flex; justify-content: center; align-items: center; }
+.auth-box { background: rgba(217, 217, 217, 0.1); border-radius: 35px; padding: 50px 60px; width: 100%; max-width: 700px; }
+.auth-title { text-align: center; font-size: 36px; font-weight: 700; margin-bottom: 40px; color: white; }
+.auth-form { display: flex; flex-direction: column; gap: 25px; }
+.auth-input { background: rgba(38, 37, 52, 0.8); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 20px 25px; color: white; font-size: 18px; outline: none; }
+.auth-input::placeholder { color: rgba(255, 255, 255, 0.5); }
+.auth-input:focus { border-color: rgba(255, 255, 255, 0.5); }
+.auth-textarea { min-height: 120px; resize: vertical; }
+.auth-select { cursor: pointer; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><path fill="white" d="M5 7l5 5 5-5z"/></svg>'); background-repeat: no-repeat; background-position: right 20px center; }
+
+/* Стили для загрузки файла */
+.file-upload-zone {
+    border: 2px dashed rgba(255, 255, 255, 0.3);
+    border-radius: 20px;
+    padding: 30px;
+    text-align: center;
+    transition: all 0.3s ease;
+    background: rgba(38, 37, 52, 0.4);
+    cursor: pointer;
+}
+.file-upload-zone:hover {
+    border-color: #FF11D3;
+    background: rgba(38, 37, 52, 0.8);
+}
+.file-upload-zone.highlight {
+    border-color: #FF11D3;
+    background: rgba(255, 17, 211, 0.1);
+}
+.hidden-file-input {
+    display: none;
+}
+.file-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    cursor: pointer;
+}
+.upload-icon-large {
+    width: 60px;
+    height: 60px;
+    opacity: 0.7;
+}
+.upload-text {
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.6);
+}
+.file-name-display {
+    font-size: 14px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.auth-submit { background: rgba(217, 217, 217, 0.15); border: none; border-radius: 20px; padding: 20px; color: white; font-size: 22px; font-weight: 700; cursor: pointer; transition: background 0.3s; margin-top: 10px; }
+.auth-submit:hover { background: rgba(217, 217, 217, 0.3); transform: translateY(-2px); }
+@media (max-width: 600px) { .auth-box { padding: 40px 30px; } .auth-title { font-size: 28px; } }
+</style>
+
+<script>
+// Drag and drop функционал
+const fileInput = document.getElementById('file-input');
+const fileNameDisplay = document.getElementById('file-name');
+const dropZone = document.getElementById('drop-zone');
+
+fileInput.addEventListener('change', function() {
+    if (this.files && this.files.length > 0) {
+        fileNameDisplay.textContent = 'Выбран файл: ' + this.files[0].name;
+        fileNameDisplay.style.color = '#FF11D3';
+    } else {
+        fileNameDisplay.textContent = 'Файл не выбран';
+        fileNameDisplay.style.color = '';
+    }
+});
+
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    dropZone.addEventListener(eventName, preventDefaults, false);
+});
+
+function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+['dragenter', 'dragover'].forEach(eventName => {
+    dropZone.addEventListener(eventName, highlight, false);
+});
+
+['dragleave', 'drop'].forEach(eventName => {
+    dropZone.addEventListener(eventName, unhighlight, false);
+});
+
+function highlight(e) {
+    dropZone.classList.add('highlight');
+}
+
+function unhighlight(e) {
+    dropZone.classList.remove('highlight');
+}
+
+dropZone.addEventListener('drop', handleDrop, false);
+
+function handleDrop(e) {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    fileInput.files = files;
+    
+    if (files.length > 0) {
+        fileNameDisplay.textContent = 'Выбран файл: ' + files[0].name;
+        fileNameDisplay.style.color = '#FF11D3';
+    }
+}
+</script>
+{% endblock %}
