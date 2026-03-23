@@ -6,6 +6,8 @@ env/
 # База данных
 *.sqlite3
 *.db
+*.sql
+music_blog_dump.sql
 
 # Медиа файлы
 media/
