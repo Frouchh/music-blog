@@ -1,18 +1,16 @@
 # Виртуальное окружение
 venv/
 env/
-.env/
+.env
 
-# База данных
+# База данных (исключаем только файлы, не папки)
 *.sqlite3
 *.db
-*.sql
-music_blog_dump.sql
 
-# Медиа файлы
-media/
-*.mp3
-*.wav
+# Медиа файлы (исключаем только файлы, не папку)
+media/*.mp3
+media/*.wav
+media/*.mp4
 
 # Python
 __pycache__/
@@ -24,7 +22,6 @@ __pycache__/
 # Django
 *.log
 staticfiles/
-db.sqlite3
 
 # IDE
 .vscode/
