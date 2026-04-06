@@ -49,7 +49,7 @@
     pip install -r requirements.txt
     ```
 
-5.  Настройте базу данных MySQL и укажите параметры подключения в music_shop/settings.py:
+5.  Настройте базу данных MySQL и укажите параметры подключения в music_blog/settings.py:
 
     ```python
         DATABASES = {
