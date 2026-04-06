@@ -1,0 +1,33 @@
+# Виртуальное окружение
+venv/
+env/
+.env
+
+# База данных (исключаем только файлы, не папки)
+*.sqlite3
+*.db
+
+# Медиа файлы (исключаем только файлы, не папку)
+media/*.mp3
+media/*.wav
+media/*.mp4
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Django
+*.log
+staticfiles/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db

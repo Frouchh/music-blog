@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Регистрация{% endblock %}
+
+{% block content %}
+<div class="auth-page-content">
+    <div class="auth-box">
+        <h1 class="auth-title">Регистрация</h1>
+        
+        <form method="POST" action="/register/" class="auth-form">
+            {% csrf_token %}
+            <input type="email" class="auth-input" name="email" placeholder="Email" required>
+            <input type="text" class="auth-input" name="username" placeholder="Придумайте логин" required>
+            <input type="password" class="auth-input" name="password" placeholder="Пароль" required>
+            <input type="password" class="auth-input" name="password_confirm" placeholder="Повторите пароль" required>
+            
+            <button type="submit" class="auth-submit">Создать аккаунт</button>
+        </form>
+
+        <div class="auth-switch">
+            Уже есть аккаунт? <a href="/login/">Войти</a>
+        </div>
+    </div>
+</div>
+
+<style>
+.auth-page-content { max-width: 1200px; margin: 160px auto 100px; padding: 0 40px; display: flex; justify-content: center; align-items: center; }
+.auth-box { background: rgba(217, 217, 217, 0.1); border-radius: 35px; padding: 50px 60px; width: 100%; max-width: 550px; }
+.auth-title { text-align: center; font-size: 36px; font-weight: 700; margin-bottom: 40px; }
+.auth-form { display: flex; flex-direction: column; gap: 25px; }
+.auth-input { background: rgba(38, 37, 52, 0.8); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 20px 25px; color: white; font-size: 18px; outline: none; }
+.auth-input::placeholder { color: rgba(255, 255, 255, 0.5); }
+.auth-submit { background: rgba(217, 217, 217, 0.15); border: none; border-radius: 20px; padding: 20px; color: white; font-size: 22px; font-weight: 700; cursor: pointer; transition: background 0.3s; margin-top: 10px; }
+.auth-submit:hover { background: rgba(217, 217, 217, 0.3); }
+.auth-switch { text-align: center; margin-top: 30px; font-size: 18px; color: rgba(255, 255, 255, 0.6); }
+.auth-switch a { color: white; font-weight: 700; text-decoration: none; margin-left: 5px; }
+</style>
+{% endblock %}

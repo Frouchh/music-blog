@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Музыкальный блог{% endblock %}
+
+{% block content %}
+<section class="featured-section rectangle-featured-section">
+    <div class="featured-bg rectangle-6"></div>
+    {% for track in featured_tracks|slice:":3" %}
+    <article class="featured-card {% if forloop.counter == 2 %}featured-card-center{% endif %} rectangle-{% if forloop.counter == 1 %}9{% elif forloop.counter == 2 %}7{% else %}8{% endif %}" 
+             data-track-id="{{ track.track_id }}">
+        <img class="ri-music-fill{% if forloop.counter == 2 %}-3{% elif forloop.counter == 3 %}-2{% endif %}" src="{% static 'ri_music-fill.svg' %}" alt="Обложка трека" />
+        <div class="featured-card_overlay rectangle-{% if forloop.counter == 2 %}11{% elif forloop.counter == 1 %}12{% else %}10{% endif %}">
+            <p class="text-wrapper-26 track-name">{{ track.title }}</p>
+            <p class="text-wrapper-30 artist-name">{{ track.author_name }}</p>
+        </div>
+    </article>
+    {% endfor %}
+</section>
+
+<section class="tracklist-section">
+    <ul class="track-column track-column--left">
+        {% for track in featured_tracks|slice:"3:7" %}
+        <li class="track-item" data-track-id="{{ track.track_id }}">
+            <img class="track-item__icon" src="{% static 'fluent_music-note-2-play-20-filled.svg' %}" alt="" />
+            <div class="track-item_info">
+                <span class="track-name">{{ track.title }}</span>
+                <span class="artist-name">{{ track.author_name }}</span>
+            </div>
+        </li>
+        {% empty %}
+        <li class="track-item">Нет доступных треков</li>
+        {% endfor %}
+    </ul>
+
+    <ul class="track-column track-column--right">
+        {% for track in featured_tracks|slice:"7:11" %}
+        <li class="track-item" data-track-id="{{ track.track_id }}">
+            <img class="track-item__icon" src="{% static 'fluent_music-note-2-play-20-filled.svg' %}" alt="" />
+            <div class="track-item_info">
+                <span class="track-name">{{ track.title }}</span>
+                <span class="artist-name">{{ track.author_name }}</span>
+            </div>
+        </li>
+        {% empty %}
+        <li class="track-item">Нет доступных треков</li>
+        {% endfor %}
+    </ul>
+</section>
+
+<script>
+document.querySelectorAll('.featured-card, .track-item').forEach(function(item) {
+    item.addEventListener('click', function() {
+        const trackId = this.dataset.trackId;
+        if (trackId) {
+            window.location.href = '/track/' + trackId + '/';
+        }
+    });
+});
+</script>
+{% endblock %}

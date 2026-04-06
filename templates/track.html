@@ -1,0 +1,216 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ track.title }} - Музыкальный блог{% endblock %}
+
+{% block content %}
+<div class="track-page-content">
+    <section class="main-card-section">
+        <div class="mega-track-card">
+            <div class="mega-card-body">
+                {% if track.audio_file %}
+                <audio controls class="audio-player" style="width: 90%; margin: 20px;">
+                    <source src="{{ track.audio_file.url }}" type="audio/mpeg">
+                    Ваш браузер не поддерживает аудиоплеер.
+                </audio>
+                {% else %}
+                <img src="{% static 'ri_music-fill.svg' %}" alt="Music" class="mega-note-icon" />
+                {% endif %}
+            </div>
+            <div class="mega-card-footer">
+                <h1 class="mega-track-name">{{ track.title }}</h1>
+                <p class="mega-artist-name">{{ track.author_name }}</p>
+            </div>
+        </div>
+        <div class="side-info-panel">
+            <div class="info-group">
+                <label>Рейтинг:</label>
+                <div class="info-box rating-box">
+                    <span class="n-value" id="avgRating">{{ avg_rating|default:"0" }}</span>
+                    <img src="{% static 'Vector (1).svg' %}" alt="Star" class="star-svg" />
+                </div>
+            </div>
+            <div class="info-group">
+                <label>Жанр:</label>
+                <div class="info-box genre-box">
+                    <span class="genre-text">{{ track.genre.name }}</span>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="track-description-block">
+        <h2 class="section-subtitle">Описание</h2>
+        <div class="description-plate">
+            <p>{{ track.description|default:"Описание отсутствует." }}</p>
+        </div>
+    </section>
+    
+    <div class="rating-action-bar">
+        <div class="score-display">
+            <input type="number" class="score-input" id="userScore" min="1" max="10" step="1" placeholder="0" {% if user_rated %}value="{{ user_score }}"{% endif %}>
+        </div>
+        <button type="submit" class="btn-submit-rating" id="submitRating" {% if user_rated %}disabled{% endif %}>
+            {% if user_rated %}Вы уже оценили{% else %}Оставить оценку{% endif %}
+        </button>
+    </div>
+    <div id="ratingMessage" style="text-align: center; margin-top: 20px; display: none;"></div>
+</div>
+
+<style>
+.track-page-content {
+    max-width: 1200px;
+    margin: 160px auto 60px;
+    padding: 0 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 50px;
+}
+.main-card-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 60px;
+    width: 100%;
+    flex-wrap: wrap;
+}
+.mega-track-card {
+    width: 450px;
+    height: 550px;
+    background: #D9D9D9;
+    border-radius: 35px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+.mega-card-body {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #2a1b3d, #1a0f2a);
+}
+.audio-player {
+    width: 90%;
+    border-radius: 30px;
+    background: #000;
+}
+.mega-note-icon { width: 180px; opacity: 0.7; }
+.mega-card-footer {
+    background: rgba(0, 0, 0, 0.75);
+    padding: 30px;
+    text-align: center;
+}
+.mega-track-name { font-size: 32px; color: white; margin-bottom: 8px; }
+.mega-artist-name { font-size: 20px; color: rgba(255,255,255,0.7); }
+.side-info-panel { display: flex; flex-direction: column; gap: 30px; }
+.info-group label { display: block; font-size: 26px; font-weight: 700; margin-bottom: 10px; color: white; }
+.info-box {
+    background: rgba(217, 217, 217, 0.1);
+    border-radius: 20px;
+    height: 70px;
+    min-width: 250px;
+    display: flex;
+    align-items: center;
+    padding: 0 25px;
+}
+.rating-box { gap: 15px; }
+.n-value { font-size: 36px; font-weight: 700; color: white; }
+.star-svg { width: 35px; height: 35px; }
+.track-description-block { width: 100%; max-width: 800px; text-align: center; }
+.description-plate { background: #323142; border-radius: 30px; padding: 40px; font-size: 18px; color: white; }
+.rating-action-bar {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 20px;
+    padding-bottom: 40px;
+}
+.score-display {
+    background: rgba(217, 217, 217, 0.1);
+    width: 100px;
+    height: 70px;
+    border-radius: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.score-input {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 36px;
+    font-weight: 700;
+    width: 100%;
+    text-align: center;
+    outline: none;
+}
+.score-input::-webkit-outer-spin-button,
+.score-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.btn-submit-rating {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 28px;
+    font-weight: 700;
+    cursor: pointer;
+}
+.btn-submit-rating:hover { opacity: 0.7; }
+.btn-submit-rating:disabled { opacity: 0.5; cursor: not-allowed; }
+@media (max-width: 900px) {
+    .main-card-section { gap: 40px; }
+    .mega-track-card { width: 100%; max-width: 350px; height: 450px; }
+    .rating-action-bar { justify-content: center; }
+}
+</style>
+
+<script>
+// Сохраняем URL для оценки
+const rateTrackUrl = '/rate/{{ track.track_id }}/';
+
+document.getElementById('submitRating')?.addEventListener('click', function() {
+    const score = document.getElementById('userScore').value;
+    if (!score || score < 1 || score > 10) {
+        showMessage('Пожалуйста, введите оценку от 1 до 10', 'error');
+        return;
+    }
+    
+    fetch(rateTrackUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ score: parseInt(score) })
+    })
+    .then(function(response) {
+        return response.json();
+    })
+    .then(function(data) {
+        if (data.success) {
+            document.getElementById('avgRating').textContent = data.avg_rating;
+            document.getElementById('submitRating').disabled = true;
+            document.getElementById('submitRating').textContent = 'Вы уже оценили';
+            showMessage(data.message, 'success');
+        } else {
+            showMessage(data.error, 'error');
+        }
+    })
+    .catch(function(error) {
+        showMessage('Ошибка при отправке оценки', 'error');
+    });
+});
+
+function showMessage(msg, type) {
+    const msgDiv = document.getElementById('ratingMessage');
+    msgDiv.textContent = msg;
+    msgDiv.style.color = type === 'error' ? '#ff4444' : '#11ff88';
+    msgDiv.style.display = 'block';
+    setTimeout(function() {
+        msgDiv.style.display = 'none';
+    }, 3000);
+}
+</script>
+{% endblock %}

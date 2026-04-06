@@ -1,0 +1,391 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Личный кабинет - Музыкальный блог{% endblock %}
+
+{% block content %}
+<div class="profile-page-content">
+    <div class="profile-layout">
+        <aside class="profile-sidebar">
+            <div class="profile-avatar-box">
+                <img src="{% static 'User (1).svg' %}" alt="Аватар пользователя" class="profile-avatar-img" />
+            </div>
+            <div class="profile-user-details">
+                <div class="profile-field">
+                    <span class="field-label">Email:</span>
+                    <span class="field-value">{{ user.email }}</span>
+                </div>
+
+                <!-- Логин с возможностью редактирования -->
+                <div class="profile-field">
+                    <span class="field-label">Логин:</span>
+                    <span class="field-value" id="loginValue">{{ user.login }}</span>
+                    <button class="edit-btn" onclick="showEditForm('login')">✏️</button>
+                </div>
+                <div id="loginForm" class="edit-form" style="display: none;">
+                    <form method="POST" action="/change-login/">
+                        {% csrf_token %}
+                        <input type="text" name="new_login" value="{{ user.login }}" required placeholder="Новый логин">
+                        <input type="password" name="password" placeholder="Подтвердите пароль" required>
+                        <button type="submit">Сохранить</button>
+                        <button type="button" onclick="hideEditForm('login')">Отмена</button>
+                    </form>
+                </div>
+
+              
+                <!-- Пароль с возможностью изменения -->
+                <div class="profile-field">
+                     <span class="field-label">Пароль:</span>
+                      <span class="field-value" id="passwordValue">********</span>
+                      <button class="edit-btn" onclick="showEditForm('password')">✏️</button>
+                </div>
+                <div id="passwordForm" class="edit-form" style="display: none;">
+                      <form method="POST" action="/change-password/">
+                    {% csrf_token %}
+                   <input type="password" name="old_password" placeholder="Старый пароль" required>
+                    <input type="password" name="new_password" placeholder="Новый пароль" required>
+                   <input type="password" name="confirm_password" placeholder="Подтвердите пароль" required>
+                    <button type="submit">Сохранить</button>
+                     <button type="button" onclick="hideEditForm('password')">Отмена</button>
+                  </form>
+                </div>
+
+                <div class="profile-field">
+                    <span class="field-label">Роль:</span>
+                    <span class="field-value">{{ user.role.name }}</span>
+                </div>
+            </div>
+            <a href="/upload/" class="btn-publish-track">
+                <img src="{% static 'fluent_music-note-2-play-20-filled.svg' %}" alt="Upload" class="publish-icon">
+                <span>Опубликовать трек</span>
+            </a>
+            <a href="/logout/" class="btn-publish-track" style="margin-top: 10px;">
+                <span>Выйти</span>
+            </a>
+        </aside>
+        
+        <section class="profile-tracks-section">
+            <h2 class="profile-section-title">Мои треки</h2>
+            <div class="profile-tracklist">
+                {% for track in user_tracks %}
+                <div class="track-item profile-track" data-track-id="{{ track.track_id }}">
+                    <img class="track-item__icon" src="{% static 'ri_music-fill.svg' %}" alt="Note" />
+                    <div class="track-item_info">
+                        <span class="track-name">{{ track.title }}</span>
+                        <span class="artist-name">{{ track.author_name }}</span>
+                        <span class="track-status">
+                            {% if track.status == 'pending' %}
+                                <span style="color: #FFA500;">⏳ На модерации</span>
+                            {% elif track.status == 'approved' %}
+                                <span style="color: #4CAF50;">✅ Опубликован</span>
+                            {% elif track.status == 'rejected' %}
+                                <span style="color: #f44336;">❌ Отклонен</span>
+                                {% if track.moderation_comment %}
+                                    <br><small style="color: #FF11D3;">📝 {{ track.moderation_comment }}</small>
+                                {% endif %}
+                            {% endif %}
+                        </span>
+                        <span class="track-date" style="font-size: 11px; color: #888;">
+                            📅 {{ track.date_publication|date:"d.m.Y" }}
+                        </span>
+                    </div>
+                    <button class="delete-track-btn" data-track-id="{{ track.track_id }}" data-track-title="{{ track.title }}">🗑️</button>
+                </div>
+                {% empty %}
+                <div class="track-item profile-track">
+                    <div class="track-item_info">
+                        <span class="track-name">У вас пока нет опубликованных треков</span>
+                        <span class="artist-name">Нажмите "Опубликовать трек", чтобы добавить первый</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+</div>
+
+<style>
+.profile-page-content { 
+    max-width: 1200px; 
+    margin: 160px auto 100px; 
+    padding: 0 40px; 
+}
+.profile-layout { 
+    display: flex; 
+    gap: 60px; 
+    align-items: flex-start; 
+    flex-wrap: wrap; 
+}
+.profile-sidebar { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 25px; 
+    flex: 0 0 380px; 
+    width: 100%; 
+}
+.profile-avatar-box { 
+    background: rgba(217, 217, 217, 0.1); 
+    border-radius: 35px; 
+    height: 350px; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+}
+.profile-avatar-img { 
+    width: 150px; 
+    height: 150px; 
+    opacity: 0.8; 
+}
+.profile-user-details { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 15px; 
+}
+.profile-field { 
+    background: rgba(217, 217, 217, 0.1); 
+    border-radius: 20px; 
+    padding: 20px 25px; 
+    display: flex; 
+    align-items: center; 
+    gap: 15px; 
+    font-size: 20px; 
+    position: relative;
+}
+.field-label { 
+    font-weight: 700; 
+    color: white; 
+    min-width: 80px; 
+}
+.field-value { 
+    color: rgba(255, 255, 255, 0.8); 
+    flex: 1;
+}
+.edit-btn {
+    background: none;
+    border: none;
+    color: #FF11D3;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 10px;
+    transition: all 0.3s;
+}
+.edit-btn:hover {
+    background: rgba(255, 17, 211, 0.2);
+    transform: scale(1.1);
+}
+.edit-form {
+    background: rgba(217, 217, 217, 0.15);
+    border-radius: 20px;
+    padding: 20px;
+    margin-top: 5px;
+}
+.edit-form form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.edit-form input {
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(38, 37, 52, 0.9);
+    color: white;
+    font-size: 14px;
+}
+.edit-form button {
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+.edit-form button[type="submit"] {
+    background: linear-gradient(135deg, #FF11D3, #FF0000);
+    color: white;
+}
+.edit-form button[type="button"] {
+    background: rgba(255,255,255,0.1);
+    color: white;
+}
+.edit-form button:hover {
+    transform: translateY(-2px);
+}
+.btn-publish-track { 
+    background: rgba(217, 217, 217, 0.1); 
+    border-radius: 20px; 
+    padding: 20px 25px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    gap: 15px; 
+    text-decoration: none; 
+    color: white; 
+    font-size: 20px; 
+    font-weight: 700; 
+    transition: all 0.3s; 
+    cursor: pointer; 
+    border: none;
+}
+.btn-publish-track:hover { 
+    background: rgba(217, 217, 217, 0.2); 
+    transform: translateY(-2px);
+}
+.publish-icon { 
+    width: 30px; 
+    height: 30px; 
+}
+.profile-tracks-section { 
+    flex: 1; 
+    min-width: 320px; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 30px; 
+}
+.profile-section-title { 
+    font-size: 32px; 
+    font-weight: 700; 
+    margin-bottom: 10px; 
+    color: white; 
+}
+.profile-tracklist { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 20px; 
+}
+.profile-track { 
+    width: 100%; 
+    justify-content: flex-start; 
+    padding: 20px 25px; 
+    cursor: pointer; 
+    background: rgba(217, 217, 217, 0.05); 
+    border-radius: 20px; 
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.profile-track:hover { 
+    background: rgba(217, 217, 217, 0.15); 
+    transform: translateX(5px);
+}
+.track-item_info { 
+    flex: 1;
+}
+.track-item_info .track-name { 
+    font-size: 18px; 
+    font-weight: 600;
+    color: white; 
+}
+.track-item_info .artist-name { 
+    font-size: 14px; 
+    color: rgba(255,255,255,0.7); 
+}
+.track-status {
+    font-size: 12px;
+    margin-top: 5px;
+    display: inline-block;
+}
+.track-date {
+    font-size: 11px;
+    color: #888;
+    margin-left: 10px;
+}
+.delete-track-btn {
+    background: rgba(244, 67, 54, 0.2);
+    border: none;
+    border-radius: 12px;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: all 0.3s;
+    color: #f44336;
+}
+.delete-track-btn:hover {
+    background: rgba(244, 67, 54, 0.4);
+    transform: scale(1.05);
+}
+@media (max-width: 960px) { 
+    .profile-layout { 
+        flex-direction: column; 
+        align-items: center; 
+    } 
+    .profile-sidebar { 
+        max-width: 450px; 
+    } 
+    .profile-tracks-section { 
+        width: 100%; 
+        max-width: 600px; 
+        align-items: center; 
+    } 
+    .profile-section-title { 
+        text-align: center; 
+    }
+    .profile-track {
+        width: 100%;
+    }
+}
+</style>
+
+<script>
+function showEditForm(field) {
+    document.getElementById(field + 'Value').style.display = 'none';
+    document.getElementById(field + 'Form').style.display = 'block';
+    const btn = event.target;
+    btn.style.display = 'none';
+}
+
+function hideEditForm(field) {
+    document.getElementById(field + 'Value').style.display = 'inline';
+    document.getElementById(field + 'Form').style.display = 'none';
+    const btns = document.querySelectorAll('.edit-btn');
+    btns.forEach(btn => btn.style.display = 'inline-block');
+}
+
+// Удаление трека
+document.querySelectorAll('.delete-track-btn').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const trackId = this.dataset.trackId;
+        const trackTitle = this.dataset.trackTitle;
+        
+        if (confirm(`Вы уверены, что хотите удалить трек "${trackTitle}"?`)) {
+            fetch(`/delete-track/${trackId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert(data.error);
+                }
+            })
+            .catch(error => {
+                alert('Ошибка при удалении трека');
+            });
+        }
+    });
+});
+
+document.querySelectorAll('.profile-track').forEach(function(track) {
+    track.addEventListener('click', function(e) {
+        if (e.target.classList.contains('track-status') || 
+            e.target.classList.contains('edit-btn') ||
+            e.target.closest('.edit-form') ||
+            e.target.classList.contains('delete-track-btn')) {
+            return;
+        }
+        const trackId = this.dataset.trackId;
+        if (trackId) {
+            window.location.href = '/track/' + trackId + '/';
+        }
+    });
+});
+</script>
+{% endblock %}
