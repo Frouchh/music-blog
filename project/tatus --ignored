@@ -1,0 +1,67 @@
+[33mcommit ba3113742a9d08608e1df127b04cf15014e4d244[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mFINAL[m[33m, [m[1;31morigin/FINAL[m[33m, [m[1;32mmain[m[33m)[m
+Author: Щемелев Глеб Дмитриевич <23199@iat.iat>
+Date:   Tue Apr 7 02:28:10 2026 +0800
+
+    Finall
+
+.env.example
+.gitignore
+Dockerfile.txt
+README.md
+docker-compose.yml
+export_db.bat
+fill_db.py
+import_db.bat
+manage.py
+media/tracks/Project_1.mp3
+media/tracks/Project_1_8oNJLoT.mp3
+media/tracks/Project_1_AefiYyq.mp3
+music_blog/__init__.py
+music_blog/asgi.py
+music_blog/settings.py
+music_blog/urls.py
+music_blog/wsgi.py
+music_blog_dump.sql
+requirements.txt
+static/Rectangle 18.svg
+static/User (1).svg
+static/User.svg
+static/Vector (1).svg
+static/Vector.svg
+static/entrypo_new.svg
+static/entypo_new (1).svg
+static/entypo_new.png
+static/fluent_music-note-2-play-20-filled.svg
+static/globals.css
+static/ix_calendar.svg
+static/material-symbols_search.svg
+static/ri_music-fill.svg
+static/streamline-flex_music-equalizer-solid.svg
+static/style.css
+static/tdesign_tree-catalog-filled.svg
+templates/admin_tracks.html
+templates/base.html
+templates/index.html
+templates/login.html
+templates/profile.html
+templates/register.html
+templates/track.html
+templates/tracks.html
+templates/tracks_new.html
+templates/tracks_week.html
+templates/upload.html
+tracks/__init__.py
+tracks/admin.py
+tracks/apps.py
+tracks/management/__init__.py
+tracks/management/commands/__init__.py
+tracks/management/commands/seed_data.py
+tracks/migrations/0001_initial.py
+tracks/migrations/0002_alter_user_password.py
+tracks/migrations/0003_track_moderated_at_track_moderated_by_and_more.py
+tracks/migrations/__init__.py
+tracks/models.py
+tracks/tests.py
+tracks/urls.py
+tracks/views.py
+urls.py
