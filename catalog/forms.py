@@ -53,3 +53,21 @@ class CatalogFilterForm(forms.Form):
     price_min = forms.DecimalField(required=False, min_value=0, label='Цена от')
     price_max = forms.DecimalField(required=False, min_value=0, label='до')
     sort = forms.ChoiceField(required=False, choices=SORT_CHOICES)
+
+
+class TrackEditForm(forms.ModelForm):
+    """Редактирование сведений о треке без замены аудиофайла."""
+    class Meta:
+        model = Track
+        fields = ['title', 'genre', 'album', 'description', 'cover']
+        widgets = {'description': forms.Textarea(attrs={'rows': 4})}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['album'].queryset = Album.objects.filter(author=self.instance.author)
+
+
+class AlbumForm(forms.ModelForm):
+    class Meta:
+        model = Album
+        fields = ['title', 'cover']

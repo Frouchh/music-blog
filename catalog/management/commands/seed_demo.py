@@ -9,7 +9,7 @@ from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
 
 from accounts.models import AuthorProfile, Role, User
-from catalog.models import Genre, LicenseType, Status, Track, TrackLicense
+from catalog.models import Album, Genre, LicenseType, Status, Track, TrackLicense
 from catalog.services import make_preview
 
 TRACKS = [
@@ -20,6 +20,7 @@ TRACKS = [
     ('Deep Blue', 'House', 'Глубокий хаус с вокальными чопами.', 247),
     ('Skyline', 'Эмбиент', 'Атмосферный эмбиент для фона.', 174),
 ]
+PENDING = ('Rainy Window', 'Lo-fi', 'Медленный lo-fi с шумом дождя.', 294)
 PRICES = {'Личная': Decimal('149'), 'Коммерческая': Decimal('990'),
           'Эксклюзивная': Decimal('9900')}
 
@@ -59,11 +60,15 @@ class Command(BaseCommand):
                                         'payout_details': 'Карта 2200 **** **** 0000'})
 
         published = Status.objects.get(name=Status.PUBLISHED)
-        for title, genre, description, freq in TRACKS:
+        album, _ = Album.objects.get_or_create(author=author, title='Night Session',
+                                               defaults={'status': published})
+        for title, genre, description, freq in TRACKS + [PENDING]:
             if Track.objects.filter(title=title).exists():
                 continue
+            status = published if title != PENDING[0] else Status.objects.get(name=Status.PENDING)
             track = Track(author=author, genre=Genre.objects.get(name=genre),
-                          status=published, title=title, description=description)
+                          status=status, title=title, description=description,
+                          album=album if title in ('Night Drive', 'Deep Blue') else None)
             track.audio_file.save(f'{title.lower().replace(" ", "_")}.wav',
                                   ContentFile(tone_wav(freq)), save=False)
             track.save()

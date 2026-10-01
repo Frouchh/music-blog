@@ -9,8 +9,8 @@ from accounts.decorators import role_required
 from orders.models import OrderItem
 from royalties.models import Royalty
 
-from .forms import (CatalogFilterForm, ReviewForm, TrackLicenseFormSet,
-                    TrackUploadForm)
+from .forms import (AlbumForm, CatalogFilterForm, ReviewForm, TrackEditForm,
+                    TrackLicenseFormSet, TrackUploadForm)
 from .models import Album, Genre, LicenseType, Status, Track
 from .services import make_preview
 
@@ -129,6 +129,32 @@ def edit_prices(request, pk):
 
 @login_required
 @role_required('author')
+def edit_track(request, pk):
+    track = get_object_or_404(Track, pk=pk, author=request.user.author_profile)
+    form = TrackEditForm(request.POST or None, request.FILES or None, instance=track)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        messages.success(request, 'Сведения о треке сохранены')
+        return redirect('author_tracks')
+    return render(request, 'catalog/edit_track.html', {'track': track, 'form': form})
+
+
+@login_required
+@role_required('author')
+def create_album(request):
+    form = AlbumForm(request.POST or None, request.FILES or None)
+    if request.method == 'POST' and form.is_valid():
+        album = form.save(commit=False)
+        album.author = request.user.author_profile
+        album.status = Status.objects.get(name=Status.PUBLISHED)
+        album.save()
+        messages.success(request, f'Альбом «{album.title}» создан')
+        return redirect('author_tracks')
+    return render(request, 'catalog/album_form.html', {'form': form})
+
+
+@login_required
+@role_required('author')
 def author_tracks(request):
     """Кабинет автора: треки, статусы модерации, статистика продаж и баланс."""
     author = request.user.author_profile
@@ -138,6 +164,7 @@ def author_tracks(request):
     totals = Royalty.objects.filter(author=author).aggregate(cnt=Count('id'), sum=Sum('amount'))
     return render(request, 'catalog/author_tracks.html', {
         'author': author, 'tracks': tracks, 'totals': totals,
+        'albums': author.albums.annotate(cnt=Count('tracks')),
         'royalties': Royalty.objects.filter(author=author)
                      .select_related('order_item__track_license__track')[:10],
     })

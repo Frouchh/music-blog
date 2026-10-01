@@ -63,3 +63,25 @@ class CatalogTests(ShopTestCase):
     def test_buyer_has_no_admin_access(self):
         self.client.force_login(self.buyer)
         self.assertEqual(self.client.get(reverse('moderation_queue')).status_code, 403)
+
+
+class AuthorCabinetTests(ShopTestCase):
+    def test_edit_track(self):
+        self.client.force_login(self.author_user)
+        self.client.post(reverse('edit_track', args=[self.track.pk]),
+                         {'title': 'Night Drive 2', 'genre': self.track.genre_id, 'description': 'new'})
+        self.track.refresh_from_db()
+        self.assertEqual(self.track.title, 'Night Drive 2')
+
+    def test_foreign_track_cannot_be_edited(self):
+        from accounts.models import AuthorProfile, Role, User
+        user = User.objects.create_user('a2', 'a2@test.ru', 'Pass-12345',
+                                        role=Role.objects.get(name=Role.AUTHOR))
+        AuthorProfile.objects.create(user=user, stage_name='Other')
+        self.client.force_login(user)
+        self.assertEqual(self.client.get(reverse('edit_track', args=[self.track.pk])).status_code, 404)
+
+    def test_create_album(self):
+        self.client.force_login(self.author_user)
+        self.client.post(reverse('create_album'), {'title': 'First EP'})
+        self.assertTrue(self.author.albums.filter(title='First EP').exists())
