@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from yookassa.domain.notification import WebhookNotificationFactory
 
 from orders.cart import Cart
 from orders.models import Order, OrderItem
@@ -43,7 +44,6 @@ def checkout(request):
 @csrf_exempt
 @require_POST
 def yookassa_webhook(request):
-    from yookassa.domain.notification import WebhookNotificationFactory
     try:
         event = WebhookNotificationFactory().create(json.loads(request.body))
     except Exception:
