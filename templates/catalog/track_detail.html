@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static humanize %}
-{% block title %}{{ track.title }} – Продажа аудио контента{% endblock %}
+{% block title %}{{ track.title }} – Soundahahahha{% endblock %}
 {% block content %}
 <div class="track-page">
     <div class="track-cover"{% if track.cover %} style="background-image:url('{{ track.cover.url }}')"{% endif %}>
@@ -9,7 +9,7 @@
     <div>
         <h1 class="page-title" style="margin-bottom:0">{{ track.title }}</h1>
         <p class="track-meta">
-            Автор: {{ track.author.stage_name }} · Жанр: {{ track.genre.name }} · Длительность {{ track.duration_display }}
+            Автор: <a href="{% url 'author_page' track.author_id %}">{{ track.author.stage_name }}</a> · Жанр: {{ track.genre.name }} · Длительность {{ track.duration_display }}
             {% if track.album %}· Альбом: <a href="{% url 'album_detail' track.album_id %}">{{ track.album.title }}</a>{% endif %}
             {% if rating.cnt %}· <span class="stars">★</span> {{ rating.avg|floatformat:1 }} ({{ rating.cnt }}){% endif %}
         </p>

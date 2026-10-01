@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Авторы – Soundahahahha{% endblock %}
+{% block content %}
+<h1 class="page-title">Авторы</h1>
+<div class="tile-grid">
+    {% for author in authors %}
+    <a class="tile" href="{% url 'author_page' author.pk %}">
+        <img src="{% static 'nav-authors.svg' %}" alt="">
+        <span class="tile-title">{{ author.stage_name }}</span>
+        <span class="muted">Треков в продаже: {{ author.cnt }}</span>
+    </a>
+    {% empty %}
+    <p class="muted">Пока нет авторов с опубликованными треками.</p>
+    {% endfor %}
+</div>
+{% endblock %}

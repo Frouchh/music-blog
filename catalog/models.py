@@ -42,6 +42,7 @@ class Status(models.Model):
     PUBLISHED = 'Опубликован'
     REJECTED = 'Отклонён'
     WITHDRAWN = 'Снят с продажи'
+    SOLD_EXCLUSIVE = 'Продан эксклюзивно'
 
     name = models.CharField('Статус', max_length=30, unique=True)
 

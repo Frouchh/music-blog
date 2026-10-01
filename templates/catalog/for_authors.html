@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Авторам – Soundahahahha{% endblock %}
+{% block content %}
+<div class="panel rules" style="max-width:900px;margin:0 auto">
+    <h1 class="page-title">Продавайте свою музыку на Soundahahahha</h1>
+    <div class="stats">
+        <div class="panel stat"><div class="value">90 %</div><div class="label">от цены каждой продажи – автору</div></div>
+        <div class="panel stat"><div class="value">{{ license_types|length }}</div><div class="label">вида лицензий</div></div>
+        <div class="panel stat"><div class="value">{{ authors_count }}</div><div class="label">авторов уже с нами</div></div>
+    </div>
+    <h2>Как начать</h2>
+    <ul>
+        <li>Зарегистрируйтесь с ролью «Автор» и укажите псевдоним.</li>
+        <li>Загрузите трек в формате MP3 или WAV до 50 МБ и задайте цены для видов лицензий.</li>
+        <li>После модерации трек появится в каталоге – покупатели слушают 30-секундный фрагмент, полный файл защищён.</li>
+        <li>Следите за продажами в кабинете и выводите деньги заявкой на выплату от 100 руб.</li>
+    </ul>
+    <h2>Виды лицензий</h2>
+    {% for lt in license_types %}
+    <p><b>{{ lt.name }}.</b> {{ lt.description }}</p>
+    {% endfor %}
+    <div style="display:flex;gap:12px;margin-top:20px">
+        {% if user.is_authenticated %}
+        <a class="btn" href="{% url 'rules' %}">Правила площадки</a>
+        {% else %}
+        <a class="btn" href="{% url 'register' %}?role=author">Стать автором</a>
+        <a class="btn btn-secondary" href="{% url 'rules' %}">Правила площадки</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

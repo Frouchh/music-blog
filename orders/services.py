@@ -9,7 +9,7 @@ from django.db.models import F
 from django.utils import timezone
 
 from accounts.models import AuthorProfile
-from catalog.models import TrackLicense
+from catalog.models import Status, Track, TrackLicense
 from downloads.models import DownloadLink
 from royalties.models import Royalty
 
@@ -39,9 +39,11 @@ def complete_order(order):
         Royalty.objects.create(author=lic.track.author, order_item=item, amount=amount)
         AuthorProfile.objects.filter(pk=lic.track.author_id).update(
             balance=F('balance') + amount)
-        # 3. Эксклюзивная лицензия снимает трек с продажи
+        # 3. Эксклюзивная лицензия снимает трек с продажи и убирает его из каталога
         if lic.license_type.is_exclusive:
             TrackLicense.objects.filter(track=lic.track).update(is_available=False)
+            Track.objects.filter(pk=lic.track_id).update(
+                status=Status.objects.get(name=Status.SOLD_EXCLUSIVE))
     # 4. Письмо покупателю со ссылкой на раздел «Мои покупки» – после фиксации транзакции
     transaction.on_commit(lambda: send_purchase_email(order))
 
@@ -51,7 +53,7 @@ def send_purchase_email(order):
              for item in order.items.select_related('track_license__track',
                                                     'track_license__license_type')]
     send_mail(
-        subject=f'Заказ №{order.pk} оплачен',
+        subject=f'Soundahahahha: заказ №{order.pk} оплачен',
         message='Спасибо за покупку!\n\n' + '\n'.join(lines) +
                 f'\n\nСкачать файлы можно в разделе «Мои покупки»: {settings.SITE_URL}/accounts/profile/\n'
                 'Ссылка действует 24 часа, не более 3 скачиваний.',

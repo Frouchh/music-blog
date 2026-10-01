@@ -199,3 +199,49 @@ h2.section-title { font-size: 24px; margin: 32px 0 16px; }
 .rules h2 { margin: 26px 0 10px; font-size: 22px; }
 .rules p, .rules li { line-height: 1.6; margin-bottom: 8px; }
 .rules ul { padding-left: 22px; }
+
+.badge-gold { background: linear-gradient(135deg, #b8860b, #e0a800); }
+
+/* Кнопка «Назад» */
+.back-link {
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-bottom: 18px; padding: 8px 16px 8px 10px;
+    border-radius: 12px; border: 1px solid var(--panel-border);
+    background: var(--panel); color: white; text-decoration: none;
+    font: 700 15px 'Inter', sans-serif; transition: transform .15s, border-color .15s;
+}
+.back-link:hover { transform: translateX(-3px); border-color: var(--accent); }
+.back-link img { width: 22px; height: 22px; }
+
+/* Навигация в шапке */
+.header .main-nav { left: 70px; gap: 26px; }
+.header .main-nav .nav-link { gap: 8px; padding-bottom: 6px; border-bottom: 3px solid transparent; }
+.header .main-nav .nav-link img { width: 34px; height: 34px; }
+.header .main-nav .nav-link.active { border-bottom-color: var(--accent); }
+.nav-text {
+    background: linear-gradient(90deg, #7b14c5 0%, #b80179 100%);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    font: 700 19px 'Inter', sans-serif; white-space: nowrap;
+}
+.brand { font-weight: 700; font-size: 19px; letter-spacing: .2px; }
+.text-wrapper-4.brand { top: 34px; }
+.cart-icon { width: 24px; height: 24px; }
+.cart-link { display: flex; align-items: center; justify-content: center; }
+
+/* Плитки жанров и авторов */
+.tile-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 18px; }
+.tile {
+    display: flex; flex-direction: column; gap: 6px; padding: 20px;
+    border-radius: 20px; background: var(--panel); border: 1px solid var(--panel-border);
+    text-decoration: none; color: white; transition: transform .15s, border-color .15s;
+}
+.tile:hover { transform: translateY(-2px); border-color: var(--accent); }
+.tile img { width: 40px; height: 40px; }
+.tile-title { font-size: 20px; font-weight: 700; }
+
+@media (max-width: 1600px) {
+    .header .main-nav { left: 30px; gap: 16px; }
+    .header .main-nav .nav-link img { width: 28px; height: 28px; }
+    .header .main-nav .nav-link span.nav-text { font-size: 16px; }
+    .header .search-container { width: 200px; right: 160px; }
+}
