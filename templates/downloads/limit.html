@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block title %}Лимит скачиваний{% endblock %}
+{% block content %}
+<div class="panel form-narrow" style="text-align:center">
+    <h1 class="page-title">Превышен лимит скачиваний</h1>
+    <p>Файл по этой ссылке можно скачать не более 3 раз.</p>
+    <p style="margin-top:20px"><a class="btn btn-secondary" href="{% url 'profile' %}">Мои покупки</a></p>
+</div>
+{% endblock %}

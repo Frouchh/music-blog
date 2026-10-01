@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Корзина{% endblock %}
+{% block content %}
+<h1 class="page-title">Корзина</h1>
+{% if items %}
+<table class="table panel">
+    <tr><th>Трек</th><th>Автор</th><th>Лицензия</th><th>Цена</th><th></th></tr>
+    {% for lic in items %}
+    <tr>
+        <td><a href="{% url 'track_detail' lic.track_id %}">{{ lic.track.title }}</a></td>
+        <td>{{ lic.track.author.stage_name }}</td>
+        <td>{{ lic.license_type.name }}</td>
+        <td>{{ lic.price|floatformat:"0g" }} ₽</td>
+        <td>
+            <form method="post" action="{% url 'cart_remove' lic.pk %}">{% csrf_token %}
+                <button class="btn btn-small btn-secondary">Удалить</button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+<div class="panel" style="margin-top:20px;display:flex;justify-content:space-between;align-items:center">
+    <div>
+        <div style="font-size:24px"><b>Итого: {{ total|floatformat:"0g" }} ₽</b></div>
+        <p class="muted">Оплата выполняется на защищённой странице платёжного сервиса ЮKassa.
+            Данные карты магазину не передаются.</p>
+    </div>
+    {% if user.is_authenticated %}
+    <form method="post" action="{% url 'checkout' %}">{% csrf_token %}
+        <button class="btn">Перейти к оплате</button>
+    </form>
+    {% else %}
+    <a class="btn" href="{% url 'login' %}?next={% url 'cart' %}">Войдите для оформления</a>
+    {% endif %}
+</div>
+{% else %}
+<p class="muted">Корзина пуста. <a href="{% url 'catalog' %}">Перейти в каталог</a></p>
+{% endif %}
+{% endblock %}

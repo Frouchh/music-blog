@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}Каталог – Продажа аудио контента{% endblock %}
+{% block content %}
+<h1 class="page-title">Каталог треков</h1>
+<div class="catalog-layout">
+    <form class="filters panel" method="get">
+        <label>Поиск
+            <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Название или автор">
+        </label>
+        <label>Жанр
+            <select name="genre">
+                <option value="">Все жанры</option>
+                {% for genre in genres %}
+                <option value="{{ genre.pk }}" {% if request.GET.genre == genre.pk|stringformat:"s" %}selected{% endif %}>{{ genre.name }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label>Цена, ₽</label>
+        <div class="price-range">
+            <input type="number" name="price_min" min="0" placeholder="от" value="{{ request.GET.price_min }}">
+            <input type="number" name="price_max" min="0" placeholder="до" value="{{ request.GET.price_max }}">
+        </div>
+        <label>Сортировка
+            <select name="sort">
+                {% for value, title in form.fields.sort.choices %}
+                <option value="{{ value }}" {% if request.GET.sort == value %}selected{% endif %}>{{ title }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <button class="btn">Показать</button>
+        <a href="{% url 'catalog' %}" class="muted">Сбросить фильтры</a>
+    </form>
+
+    <section>
+        <div class="track-grid">
+            {% for track in page %}
+                {% include 'catalog/_track_card.html' %}
+            {% empty %}
+                <p class="muted">По заданным условиям треки не найдены.</p>
+            {% endfor %}
+        </div>
+        {% if page.paginator.num_pages > 1 %}
+        <nav class="pagination">
+            {% if page.has_previous %}<a class="btn btn-small btn-secondary" href="?{% for k, v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v|urlencode }}&{% endif %}{% endfor %}page={{ page.previous_page_number }}">←</a>{% endif %}
+            <span class="muted">Страница {{ page.number }} из {{ page.paginator.num_pages }}</span>
+            {% if page.has_next %}<a class="btn btn-small btn-secondary" href="?{% for k, v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v|urlencode }}&{% endif %}{% endfor %}page={{ page.next_page_number }}">→</a>{% endif %}
+        </nav>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+// Одновременно играет только один демофрагмент
+document.addEventListener('play', e => {
+    document.querySelectorAll('audio').forEach(a => { if (a !== e.target) a.pause(); });
+}, true);
+</script>
+{% endblock %}

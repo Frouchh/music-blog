@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Результат оплаты{% endblock %}
+{% block content %}
+<div class="panel form-narrow" style="text-align:center">
+    {% if order.status == 'paid' %}
+    <h1 class="page-title">Оплата прошла успешно</h1>
+    <p>Заказ №{{ order.id }} на сумму {{ order.total|floatformat:"0g" }} ₽ оплачен.
+        Ссылки на скачивание доступны в разделе «Мои покупки» в течение 24 часов, не более 3 скачиваний.</p>
+    <p style="margin-top:20px"><a class="btn" href="{% url 'profile' %}">Мои покупки</a></p>
+    {% else %}
+    <h1 class="page-title">Оплата не завершена</h1>
+    <p>Заказ №{{ order.id }}: {{ order.get_status_display|lower }}. Если деньги списаны,
+        статус обновится автоматически после уведомления платёжного сервиса.</p>
+    <p style="margin-top:20px"><a class="btn btn-secondary" href="{% url 'profile' %}">Мои покупки</a></p>
+    {% endif %}
+</div>
+{% endblock %}

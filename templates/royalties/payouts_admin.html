@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Выплаты авторам{% endblock %}
+{% block content %}
+<h1 class="page-title">Выплаты авторам</h1>
+{% include 'moderation/_tabs.html' with tab='payouts' %}
+<table class="table panel">
+    <tr><th>№</th><th>Автор</th><th>Реквизиты</th><th>Баланс</th><th>Сумма</th><th>Статус</th><th></th></tr>
+    {% for p in payouts %}
+    <tr>
+        <td>{{ p.pk }}</td>
+        <td>{{ p.author.stage_name }}</td>
+        <td>{{ p.author.payout_details }}</td>
+        <td>{{ p.author.balance|floatformat:"2g" }} ₽</td>
+        <td>{{ p.amount|floatformat:"2g" }} ₽</td>
+        <td>{{ p.get_status_display }}</td>
+        <td>
+            {% if p.status == 'requested' %}
+            <form method="post" action="{% url 'process_payout' p.pk 'approve' %}" class="inline-form">{% csrf_token %}
+                <button class="btn btn-small">Подтвердить</button></form>
+            <form method="post" action="{% url 'process_payout' p.pk 'reject' %}" class="inline-form">{% csrf_token %}
+                <button class="btn btn-small btn-danger">Отклонить</button></form>
+            {% endif %}
+        </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="7" class="muted">Заявок нет</td></tr>
+    {% endfor %}
+</table>
+{% endblock %}

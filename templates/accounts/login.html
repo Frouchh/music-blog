@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Вход{% endblock %}
+{% block content %}
+<div class="panel form-narrow">
+    <h1 class="page-title">Вход</h1>
+    <form method="post">
+        {% csrf_token %}
+        {% include 'includes/form_fields.html' %}
+        <input type="hidden" name="next" value="{{ next }}">
+        <button class="btn">Войти</button>
+    </form>
+    <p class="muted" style="margin-top:16px">Нет учётной записи? <a href="{% url 'register' %}">Зарегистрируйтесь</a></p>
+</div>
+{% endblock %}

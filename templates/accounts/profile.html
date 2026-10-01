@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Мои покупки{% endblock %}
+{% block content %}
+<h1 class="page-title">Мои покупки</h1>
+{% for order in orders %}
+<div class="panel" style="margin-bottom:20px">
+    <h2 style="margin-bottom:12px">Заказ №{{ order.id }} от {{ order.created_at|date:"d.m.Y H:i" }}
+        <span class="badge {% if order.status == 'paid' %}badge-ok{% elif order.status == 'pending' %}badge-wait{% else %}badge-bad{% endif %}">{{ order.get_status_display }}</span>
+    </h2>
+    <table class="table">
+        <tr><th>Трек</th><th>Лицензия</th><th>Цена</th><th>Скачивание</th></tr>
+        {% for item in order.items.all %}
+        <tr>
+            <td><a href="{% url 'track_detail' item.track_license.track_id %}">{{ item.track_license.track.title }}</a></td>
+            <td>{{ item.track_license.license_type.name }}</td>
+            <td>{{ item.price|floatformat:"0g" }} ₽</td>
+            <td>
+                {% with link=item.download_link %}
+                {% if order.status == 'paid' and link.is_active %}
+                    <a class="btn btn-small" href="{% url 'download' link.token %}">Скачать</a>
+                    <span class="muted">осталось {{ link.downloads_left }}, до {{ link.expires_at|date:"d.m H:i" }}</span>
+                {% elif order.status == 'paid' %}
+                    <span class="muted">Ссылка недействительна</span>
+                {% else %}
+                    <span class="muted">После оплаты</span>
+                {% endif %}
+                {% endwith %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <p style="margin-top:12px"><b>Итого: {{ order.total|floatformat:"0g" }} ₽</b></p>
+</div>
+{% empty %}
+<p class="muted">Покупок пока нет. <a href="{% url 'catalog' %}">Перейти в каталог</a></p>
+{% endfor %}
+{% endblock %}

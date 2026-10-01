@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load static humanize %}
+{% block title %}{{ track.title }} – Продажа аудио контента{% endblock %}
+{% block content %}
+<div class="track-page">
+    <div class="track-cover"{% if track.cover %} style="background-image:url('{{ track.cover.url }}')"{% endif %}>
+        {% if not track.cover %}<img src="{% static 'ri_music-fill.svg' %}" alt="" style="width:160px;opacity:.6">{% endif %}
+    </div>
+    <div>
+        <h1 class="page-title" style="margin-bottom:0">{{ track.title }}</h1>
+        <p class="track-meta">
+            Автор: {{ track.author.stage_name }} · Жанр: {{ track.genre.name }} · Длительность {{ track.duration_display }}
+            {% if track.album %}· Альбом: <a href="{% url 'album_detail' track.album_id %}">{{ track.album.title }}</a>{% endif %}
+            {% if rating.cnt %}· <span class="stars">★</span> {{ rating.avg|floatformat:1 }} ({{ rating.cnt }}){% endif %}
+        </p>
+        {% if track.status.name != 'Опубликован' %}
+        <p class="flash flash-warning" style="margin:0 0 16px">Статус: {{ track.status.name }}{% if track.moderation_comment %} – {{ track.moderation_comment }}{% endif %}</p>
+        {% endif %}
+
+        {% if track.preview_file %}
+        <audio controls src="{{ track.preview_file.url }}"></audio>
+        <p class="muted" style="margin:-10px 0 18px">Демонстрационный фрагмент 30 секунд</p>
+        {% endif %}
+        <p style="margin-bottom:20px">{{ track.description|linebreaksbr|default:"Описание отсутствует." }}</p>
+
+        <h2 class="section-title">Выберите вид лицензии</h2>
+        <form method="post" action="{% url 'cart_add' %}" id="licenseForm">
+            {% csrf_token %}
+            <table class="table panel">
+                <tr><th></th><th>Вид лицензии</th><th>Права покупателя</th><th>Цена</th></tr>
+                {% for lic in licenses %}
+                <tr class="{% if not lic.is_available %}disabled{% endif %}">
+                    <td><input type="radio" name="license_id" value="{{ lic.pk }}" {% if not lic.is_available %}disabled{% elif forloop.first %}checked{% endif %}></td>
+                    <td>{{ lic.license_type.name }}</td>
+                    <td>{{ lic.license_type.description }}</td>
+                    <td><b>{{ lic.price|floatformat:"0g" }} ₽</b></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4" class="muted">Цены ещё не установлены</td></tr>
+                {% endfor %}
+            </table>
+            <div style="display:flex;gap:14px;margin-top:18px;align-items:center">
+                <button class="btn" type="submit" id="addToCart">Добавить в корзину</button>
+                <button class="btn btn-secondary" type="submit" name="buy_now" value="1">Купить сейчас</button>
+                <span class="muted" id="cartMessage"></span>
+            </div>
+        </form>
+    </div>
+</div>
+
+<h2 class="section-title">Отзывы покупателей</h2>
+{% if review_form %}
+<form method="post" action="{% url 'add_review' track.pk %}" class="panel" style="margin-bottom:20px">
+    {% csrf_token %}
+    {% include 'includes/form_fields.html' with form=review_form %}
+    <button class="btn">Оставить отзыв</button>
+</form>
+{% endif %}
+{% for review in reviews %}
+<div class="review">
+    <span class="stars">{% for i in "12345" %}{% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}{% endfor %}</span>
+    <b>{{ review.user.username }}</b> <span class="muted">{{ review.created_at|date:"d.m.Y" }}</span>
+    <p>{{ review.text }}</p>
+</div>
+{% empty %}
+<p class="muted">Отзывов пока нет. Оставить отзыв может покупатель трека.</p>
+{% endfor %}
+{% endblock %}
+{% block scripts %}
+<script>
+// Добавление в корзину без перезагрузки страницы (AJAX)
+document.getElementById('addToCart').addEventListener('click', async (e) => {
+    e.preventDefault();
+    const form = document.getElementById('licenseForm');
+    if (!form.querySelector('input[name=license_id]:checked')) return;
+    const response = await fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: {'X-Requested-With': 'XMLHttpRequest'},
+    });
+    if (response.ok) {
+        const data = await response.json();
+        document.getElementById('cartCount').textContent = data.count;
+        document.getElementById('cartMessage').textContent = 'Добавлено в корзину';
+    }
+});
+</script>
+{% endblock %}

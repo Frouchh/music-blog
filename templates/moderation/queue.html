@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Модерация{% endblock %}
+{% block content %}
+<h1 class="page-title">Администрирование</h1>
+{% include 'moderation/_tabs.html' with tab='queue' %}
+
+<h2 class="section-title">Очередь модерации ({{ pending|length }})</h2>
+{% for track in pending %}
+<div class="panel" style="margin-bottom:16px">
+    <h3><a href="{% url 'track_detail' track.pk %}">{{ track.title }}</a>
+        <span class="muted">– {{ track.author.stage_name }}, {{ track.genre.name }}, {{ track.duration_display }}, загружен {{ track.created_at|date:"d.m.Y H:i" }}</span></h3>
+    {% if track.preview_file %}<audio controls preload="none" src="{{ track.preview_file.url }}" style="width:100%;margin:10px 0"></audio>{% endif %}
+    <p class="muted">{{ track.description|truncatechars:300 }}</p>
+    <form method="post" style="display:flex;gap:10px;margin-top:10px;align-items:center">
+        {% csrf_token %}
+        <input type="text" name="comment" placeholder="Комментарий (обязателен при отклонении)" class="search-input" style="flex:1;padding:10px 14px;border-radius:10px;background:#1d1c29;color:white;border:1px solid rgba(255,255,255,.12)">
+        <button class="btn btn-small" formaction="{% url 'moderate' track.pk 'approve' %}">Одобрить</button>
+        <button class="btn btn-small btn-danger" formaction="{% url 'moderate' track.pk 'reject' %}">Отклонить</button>
+    </form>
+</div>
+{% empty %}
+<p class="muted">Нет треков, ожидающих проверки.</p>
+{% endfor %}
+
+<h2 class="section-title">Последние решения</h2>
+<table class="table panel">
+    <tr><th>Трек</th><th>Автор</th><th>Статус</th><th>Комментарий</th><th></th></tr>
+    {% for track in recent %}
+    <tr>
+        <td><a href="{% url 'track_detail' track.pk %}">{{ track.title }}</a></td>
+        <td>{{ track.author.stage_name }}</td>
+        <td>{{ track.status.name }}</td>
+        <td>{{ track.moderation_comment }}</td>
+        <td>{% if track.status.name == 'Опубликован' %}
+            <form method="post" action="{% url 'moderate' track.pk 'withdraw' %}">{% csrf_token %}
+                <button class="btn btn-small btn-secondary">Снять с продажи</button></form>
+            {% endif %}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

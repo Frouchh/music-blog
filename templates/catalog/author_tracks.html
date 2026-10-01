@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Кабинет автора{% endblock %}
+{% block content %}
+<h1 class="page-title">Кабинет автора: {{ author.stage_name }}</h1>
+<div class="stats">
+    <div class="panel stat"><div class="value">{{ author.balance|floatformat:"2g" }} ₽</div><div class="label">Баланс</div></div>
+    <div class="panel stat"><div class="value">{{ totals.cnt }}</div><div class="label">Продано лицензий</div></div>
+    <div class="panel stat"><div class="value">{{ totals.sum|default:0|floatformat:"2g" }} ₽</div><div class="label">Начислено всего</div></div>
+</div>
+<div style="display:flex;gap:12px;margin-bottom:10px">
+    <a class="btn" href="{% url 'upload_track' %}">Загрузить трек</a>
+    <a class="btn btn-secondary" href="{% url 'payouts' %}">Выплаты и реквизиты</a>
+</div>
+
+<h2 class="section-title">Мои треки</h2>
+<table class="table panel">
+    <tr><th>Название</th><th>Жанр</th><th>Статус</th><th>Продажи</th><th>Доход</th><th></th></tr>
+    {% for track in tracks %}
+    <tr>
+        <td><a href="{% url 'track_detail' track.pk %}">{{ track.title }}</a></td>
+        <td>{{ track.genre.name }}</td>
+        <td>
+            <span class="badge {% if track.status.name == 'Опубликован' %}badge-ok{% elif track.status.name == 'На модерации' %}badge-wait{% else %}badge-bad{% endif %}">{{ track.status.name }}</span>
+            {% if track.moderation_comment %}<div class="helptext">{{ track.moderation_comment }}</div>{% endif %}
+        </td>
+        <td>{{ track.sales }}</td>
+        <td>{{ track.earned|default:0|floatformat:"2g" }} ₽</td>
+        <td><a class="btn btn-small btn-secondary" href="{% url 'edit_prices' track.pk %}">Цены</a></td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="6" class="muted">Вы ещё не загрузили ни одного трека</td></tr>
+    {% endfor %}
+</table>
+
+<h2 class="section-title">Последние начисления</h2>
+<table class="table panel">
+    <tr><th>Дата</th><th>Трек</th><th>Цена продажи</th><th>Начислено</th></tr>
+    {% for r in royalties %}
+    <tr>
+        <td>{{ r.created_at|date:"d.m.Y H:i" }}</td>
+        <td>{{ r.order_item.track_license.track.title }}</td>
+        <td>{{ r.order_item.price|floatformat:"2g" }} ₽</td>
+        <td>{{ r.amount|floatformat:"2g" }} ₽</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="4" class="muted">Продаж пока нет</td></tr>
+    {% endfor %}
+</table>
+{% endblock %}

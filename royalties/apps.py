@@ -1,0 +1,7 @@
+from django.apps import AppConfig
+
+
+class RoyaltiesConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'royalties'
+    verbose_name = 'Вознаграждения'

@@ -1,0 +1,14 @@
+{{ formset.management_form }}
+{{ formset.non_form_errors }}
+<table class="table">
+    <tr><th>Вид лицензии</th><th>Цена, ₽</th><th>Доступна</th></tr>
+    {% for f in formset %}
+    <tr>
+        <td>{% for h in f.hidden_fields %}{{ h }}{% endfor %}{{ f.license_type }}{{ f.license_type.errors }}</td>
+        <td>{{ f.price }}{{ f.price.errors }}</td>
+        <td>{{ f.is_available }}</td>
+    </tr>
+    {% if f.non_field_errors %}<tr><td colspan="3">{{ f.non_field_errors }}</td></tr>{% endif %}
+    {% endfor %}
+</table>
+<p class="helptext">Оставьте цену пустой, если лицензия не продаётся.</p>
