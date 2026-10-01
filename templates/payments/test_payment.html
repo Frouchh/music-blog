@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Тестовая оплата{% endblock %}
+{% block content %}
+<div class="panel form-narrow" style="text-align:center">
+    <h1 class="page-title">Тестовая форма оплаты</h1>
+    <p class="muted">Ключи ЮKassa не заданы, поэтому вместо страницы платёжного сервиса
+        открыта тестовая форма. Деньги не списываются.</p>
+    <p style="font-size:22px;margin:20px 0"><b>{{ log.order }} – {{ log.amount|floatformat:"0g" }} ₽</b></p>
+    <form method="post" style="display:flex;gap:12px;justify-content:center">
+        {% csrf_token %}
+        <button class="btn" name="result" value="pay">Оплатить</button>
+        <button class="btn btn-danger" name="result" value="decline">Отказ банка</button>
+    </form>
+</div>
+{% endblock %}

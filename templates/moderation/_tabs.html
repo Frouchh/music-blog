@@ -1,0 +1,7 @@
+<nav class="admin-tabs">
+    <a class="btn btn-small {% if tab != 'queue' %}btn-secondary{% endif %}" href="{% url 'moderation_queue' %}">Модерация</a>
+    <a class="btn btn-small {% if tab != 'users' %}btn-secondary{% endif %}" href="{% url 'moderation_users' %}">Пользователи</a>
+    <a class="btn btn-small {% if tab != 'payouts' %}btn-secondary{% endif %}" href="{% url 'payouts_admin' %}">Выплаты авторам</a>
+    <a class="btn btn-small {% if tab != 'report' %}btn-secondary{% endif %}" href="{% url 'moderation_report' %}">Отчёт о продажах</a>
+    <a class="btn btn-small btn-secondary" href="/django-admin/">Справочники</a>
+</nav>

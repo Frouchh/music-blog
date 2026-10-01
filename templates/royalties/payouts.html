@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Выплаты{% endblock %}
+{% block content %}
+<h1 class="page-title">Выплаты</h1>
+<div class="stats">
+    <div class="panel stat"><div class="value">{{ author.balance|floatformat:"2g" }} ₽</div><div class="label">Доступно к выплате</div></div>
+</div>
+<div class="catalog-layout" style="grid-template-columns:1fr 1fr">
+    <form method="post" class="panel">
+        {% csrf_token %}
+        <h2 style="margin-bottom:14px">Заявка на выплату</h2>
+        {% include 'includes/form_fields.html' %}
+        <button class="btn">Отправить заявку</button>
+    </form>
+    <form method="post" action="{% url 'update_details' %}" class="panel">
+        {% csrf_token %}
+        <h2 style="margin-bottom:14px">Профиль и реквизиты</h2>
+        {% include 'includes/form_fields.html' with form=profile_form %}
+        <button class="btn btn-secondary">Сохранить</button>
+    </form>
+</div>
+<h2 class="section-title">История заявок</h2>
+<table class="table panel">
+    <tr><th>Дата</th><th>Сумма</th><th>Статус</th><th>Обработана</th></tr>
+    {% for p in payouts %}
+    <tr>
+        <td>{{ p.requested_at|date:"d.m.Y H:i" }}</td>
+        <td>{{ p.amount|floatformat:"2g" }} ₽</td>
+        <td>{{ p.get_status_display }}</td>
+        <td>{{ p.processed_at|date:"d.m.Y H:i"|default:"–" }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="4" class="muted">Заявок нет</td></tr>
+    {% endfor %}
+</table>
+{% endblock %}

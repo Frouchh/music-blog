@@ -1,160 +1,87 @@
-[README.md](https://github.com/user-attachments/files/26186509/README.md)
-# 🎵 Музыкальный блог
+# Интернет-магазин «Продажа аудио контента»
 
-Веб-приложение для публикации и прослушивания музыки с системой модерации контента.
+Веб-платформа для коммерческой дистрибуции аудиоконтента: авторы загружают треки
+и назначают цены по видам лицензий, покупатели слушают 30-секундные демофрагменты,
+оплачивают заказ через ЮKassa и скачивают полный файл по защищённой ссылке.
+Авторам начисляется вознаграждение за вычетом комиссии площадки.
 
-## 📋 Функционал
+Проект развит из курсового проекта «Музыкальный блог» (приложение `tracks` –
+старая версия, в настройках отключено).
 
-- Регистрация и авторизация пользователей
-- Прослушивание музыкальных треков (встроенный аудиоплеер)
-- Публикация треков с загрузкой аудиофайлов (MP3, WAV)
-- Система оценки треков по 10-балльной шкале
-- Модерация контента (треки проходят проверку администратором)
-- Поиск по названию трека и имени автора
-- Фильтрация треков по жанру
-- Личный кабинет пользователя с отображением статуса треков
-- Страница модерации для администратора
+## Роли и функции
 
-## 🛠 Технологии
+| Роль | Возможности |
+|------|-------------|
+| Гость | Каталог, поиск, фильтры по жанру и цене, прослушивание демофрагментов, регистрация |
+| Покупатель | Корзина, выбор лицензии, оплата, «Мои покупки», скачивание (24 ч, до 3 раз), отзывы |
+| Автор | Загрузка треков (MP3/WAV до 50 МБ), цены по лицензиям, статистика продаж, баланс, заявки на выплату |
+| Администратор | Модерация треков, блокировка пользователей, подтверждение выплат, отчёт о продажах, справочники |
 
-- **Backend:** Python 3.12, Django 4.2
-- **Database:** MySQL / MariaDB или SQLite
-- **Frontend:** HTML5, CSS3, JavaScript
-- **Дополнительно:** AJAX (оценка треков без перезагрузки страницы)
+## Технологии
 
-## 🚀 Установка и запуск
+- Python 3.12, Django 5.1
+- MySQL 8.4 LTS (или SQLite для быстрого запуска)
+- ЮKassa (SDK `yookassa`), тестовый магазин
+- mutagen, pydub + FFmpeg – длительность трека и демофрагмент
+- HTML5, CSS3, JavaScript (AJAX-добавление в корзину)
 
-### 1. Клонирование репозитория
+## Структура
+
+```
+audio_shop/       настройки проекта, корневые маршруты
+accounts/         пользователи, роли, профили авторов, декоратор role_required
+catalog/          треки, альбомы, жанры, лицензии, отзывы, загрузка
+orders/           корзина (в сессии), заказы, complete_order
+payments/         оплата через ЮKassa, вебхук, журнал платежей
+downloads/        защищённые ссылки на скачивание
+royalties/        начисления и выплаты авторам
+moderation/       модерация, пользователи, отчёт
+templates/        HTML-шаблоны
+static/           CSS и иконки
+media/            публичные файлы: демофрагменты и обложки
+protected_media/  полные аудиофайлы (не публикуются веб-сервером)
+```
+
+## Запуск
 
 ```bash
-git clone https://github.com/Frouchh/music-blog.git
-cd music-blog
-2. Создание и активация виртуального окружения
-Windows:
-
-bash
 python -m venv venv
-venv\Scripts\activate
-Mac/Linux:
-
-bash
-python3 -m venv venv
-source venv/bin/activate
-3. Установка зависимостей
-bash
+venv\Scripts\activate            # Windows (Linux/Mac: source venv/bin/activate)
 pip install -r requirements.txt
-4. Настройка базы данных
-Вариант А: SQLite (рекомендуется для быстрого запуска)
-Откройте файл music_blog/settings.py
+copy .env.example .env           # Linux/Mac: cp .env.example .env
+```
 
-Найдите блок DATABASES и замените его на:
+Для MySQL создайте базу и пользователя:
 
-python
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-База данных создастся автоматически при миграции
+```sql
+CREATE DATABASE audio_shop CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'shop_user'@'localhost' IDENTIFIED BY 'пароль';
+GRANT ALL PRIVILEGES ON audio_shop.* TO 'shop_user'@'localhost';
+```
 
-Вариант Б: MySQL (для production)
-Убедитесь, что MySQL сервер запущен
+и укажите пароль в `.env` (`DB_PASSWORD`). Без MySQL добавьте в `.env` строку `DB_ENGINE=sqlite`.
 
-Создайте базу данных:
-
-sql
-CREATE DATABASE music_blog CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-Откройте файл music_blog/settings.py и настройте подключение:
-
-python
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'music_blog',
-        'USER': 'root',
-        'PASSWORD': 'ваш_пароль',
-        'HOST': 'localhost',
-        'PORT': '3306',
-    }
-}
-Если используете XAMPP, пароль по умолчанию пустой: 'PASSWORD': ''
-
-Для работы с MySQL может потребоваться установка драйвера:
-
-bash
-pip install mysqlclient
-или
-
-bash
-pip install pymysql
-Если используете pymysql, добавьте в music_blog/__init__.py:
-
-python
-import pymysql
-pymysql.install_as_MySQLdb()
-5. Применение миграций
-bash
-python manage.py makemigrations
-python manage.py migrate
-6. Создание суперпользователя (администратора)
-bash
-python manage.py createsuperuser
-Введите:
-
-Username: admin
-
-Email: admin@example.com
-
-Password: admin123
-
-7. Заполнение базы тестовыми данными (опционально)
-bash
-python fill_db.py
-Создаст:
-
-Роли: admin, user, moderator
-
-Жанры: Phonk, House, Techno, Hip-Hop
-
-Тестового пользователя: testuser / test123
-
-Тестовые треки
-
-8. Сбор статических файлов
-bash
-python manage.py collectstatic --noinput
-9. Запуск сервера
-bash
+```bash
+python manage.py migrate         # таблицы + справочники (роли, статусы, жанры, лицензии)
+python manage.py seed_demo       # демо-данные: admin / author / buyer, пароль Demo-12345
 python manage.py runserver
-Откройте в браузере: http://127.0.0.1:8000/
+```
 
-👥 Учетные записи для тестирования
-Роль	        Логин    Пароль
-Администратор	adminт   admin123
-Пользователь	testuser test123
-🔧 Структура проекта
-text
-music-blog/
-├── manage.py                 # Управление проектом
-├── requirements.txt          # Зависимости
-├── fill_db.py                # Скрипт заполнения тестовыми данными
-├── music_blog/               # Настройки проекта
-│   ├── settings.py           # Конфигурация Django
-│   └── urls.py               # Основные маршруты
-├── tracks/                   # Основное приложение
-│   ├── models.py             # Модели базы данных
-│   ├── views.py              # Представления
-│   ├── urls.py               # Маршруты приложения
-│   └── migrations/           # Миграции базы данных
-├── templates/                # HTML шаблоны
-│   ├── base.html             # Базовый шаблон
-│   ├── index.html            # Главная страница
-│   ├── track.html            # Страница трека
-│   ├── upload.html           # Публикация трека
-│   ├── profile.html          # Личный кабинет
-│   ├── login.html            # Вход
-│   ├── register.html         # Регистрация
-│   └── admin_tracks.html     # Страница модерации
-├── static/                   # CSS, изображения, иконки
-└── media/                    # Загруженные аудиофайлы (создаётся автоматически)
+Для нарезки демофрагментов нужен установленный FFmpeg (в PATH).
+
+### Оплата
+
+Если в `.env` заданы `YOOKASSA_SHOP_ID` и `YOOKASSA_SECRET_KEY` (тестовый магазин ЮKassa),
+покупатель перенаправляется на страницу оплаты ЮKassa, а результат приходит на
+`/payments/webhook/`. Без ключей открывается встроенная тестовая форма оплаты
+с кнопками «Оплатить» и «Отказ банка».
+
+## Тесты
+
+```bash
+python manage.py test accounts catalog orders downloads royalties
+```
+
+25 автотестов: регистрация и вход, загрузка и проверка файлов, фильтры каталога,
+модерация, оплата и отказ, повторное уведомление, эксклюзивная лицензия,
+расчёт вознаграждения, лимит и срок ссылок, выплаты.

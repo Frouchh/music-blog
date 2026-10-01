@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Загрузка трека{% endblock %}
+{% block content %}
+<div class="panel" style="max-width:760px;margin:0 auto">
+    <h1 class="page-title">Загрузка трека</h1>
+    <form method="post" enctype="multipart/form-data" id="uploadForm">
+        {% csrf_token %}
+        {% include 'includes/form_fields.html' %}
+        <h2 class="section-title">Цены по видам лицензий</h2>
+        {% include 'catalog/_license_formset.html' %}
+        <p class="helptext" style="margin:14px 0">Файл MP3 или WAV до 50 МБ. После загрузки трек проходит модерацию,
+            в каталоге доступен только 30-секундный демофрагмент.</p>
+        <button class="btn">Отправить на модерацию</button>
+    </form>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+// Проверка файла на клиенте (на сервере проверка повторяется)
+document.getElementById('id_audio_file').addEventListener('change', function () {
+    const f = this.files[0];
+    if (!f) return;
+    const ext = f.name.split('.').pop().toLowerCase();
+    if (!['mp3', 'wav'].includes(ext)) { alert('Допустимы только файлы MP3 и WAV'); this.value = ''; }
+    else if (f.size > 50 * 1024 * 1024) { alert('Размер файла не должен превышать 50 МБ'); this.value = ''; }
+});
+</script>
+{% endblock %}

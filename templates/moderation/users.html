@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Пользователи{% endblock %}
+{% block content %}
+<h1 class="page-title">Пользователи</h1>
+{% include 'moderation/_tabs.html' with tab='users' %}
+<table class="table panel">
+    <tr><th>Логин</th><th>E-mail</th><th>Роль</th><th>Дата регистрации</th><th>Состояние</th><th></th></tr>
+    {% for u in users %}
+    <tr>
+        <td>{{ u.username }}</td>
+        <td>{{ u.email }}</td>
+        <td>{{ u.role|default:"–" }}</td>
+        <td>{{ u.date_joined|date:"d.m.Y" }}</td>
+        <td>{% if u.is_blocked %}<span class="badge badge-bad">Заблокирован</span>{% else %}<span class="badge badge-ok">Активен</span>{% endif %}</td>
+        <td>{% if u != user %}
+            <form method="post" action="{% url 'toggle_block' u.pk %}">{% csrf_token %}
+                <button class="btn btn-small {% if not u.is_blocked %}btn-danger{% else %}btn-secondary{% endif %}">{% if u.is_blocked %}Разблокировать{% else %}Заблокировать{% endif %}</button>
+            </form>{% endif %}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

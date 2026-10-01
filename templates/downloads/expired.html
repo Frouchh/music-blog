@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block title %}Ссылка недействительна{% endblock %}
+{% block content %}
+<div class="panel form-narrow" style="text-align:center">
+    <h1 class="page-title">Срок действия ссылки истёк</h1>
+    <p>Ссылка на скачивание действует 24 часа после оплаты. Обратитесь к администратору магазина.</p>
+    <p style="margin-top:20px"><a class="btn btn-secondary" href="{% url 'profile' %}">Мои покупки</a></p>
+</div>
+{% endblock %}

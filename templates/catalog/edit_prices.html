@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Цены – {{ track.title }}{% endblock %}
+{% block content %}
+<div class="panel" style="max-width:760px;margin:0 auto">
+    <h1 class="page-title">Цены: {{ track.title }}</h1>
+    <form method="post">
+        {% csrf_token %}
+        {% include 'catalog/_license_formset.html' %}
+        <div style="margin-top:16px;display:flex;gap:12px">
+            <button class="btn">Сохранить</button>
+            <a class="btn btn-secondary" href="{% url 'author_tracks' %}">Назад</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

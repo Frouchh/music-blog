@@ -1,0 +1,14 @@
+{% load static humanize %}
+<article class="track-card">
+    <a href="{% url 'track_detail' track.pk %}" class="cover"{% if track.cover %} style="background-image:url('{{ track.cover.url }}')"{% endif %}>
+        {% if not track.cover %}<img class="note" src="{% static 'ri_music-fill.svg' %}" alt="">{% endif %}
+    </a>
+    <div class="body">
+        <a href="{% url 'track_detail' track.pk %}" class="track-name">{{ track.title }}</a>
+        <span class="artist-name">{{ track.author.stage_name }} · {{ track.genre.name }}</span>
+        {% if track.preview_file %}
+        <audio controls preload="none" src="{{ track.preview_file.url }}"></audio>
+        {% endif %}
+        <span class="price">{% if track.price_from %}от {{ track.price_from|floatformat:"0g" }} ₽{% else %}Нет в продаже{% endif %}</span>
+    </div>
+</article>

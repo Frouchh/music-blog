@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}{{ album.title }}{% endblock %}
+{% block content %}
+<h1 class="page-title">{{ album.title }} <span class="muted">– {{ album.author.stage_name }}</span></h1>
+<div class="track-grid">
+    {% for track in tracks %}
+        {% include 'catalog/_track_card.html' %}
+    {% empty %}
+        <p class="muted">В альбоме нет опубликованных треков.</p>
+    {% endfor %}
+</div>
+{% endblock %}

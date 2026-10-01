@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Отчёт о продажах{% endblock %}
+{% block content %}
+<h1 class="page-title">Отчёт о продажах</h1>
+{% include 'moderation/_tabs.html' with tab='report' %}
+<div class="stats">
+    <div class="panel stat"><div class="value">{{ orders_count }}</div><div class="label">Оплаченных заказов</div></div>
+    <div class="panel stat"><div class="value">{{ revenue|floatformat:"2g" }} ₽</div><div class="label">Выручка</div></div>
+    <div class="panel stat"><div class="value">{{ royalties|floatformat:"2g" }} ₽</div><div class="label">Начислено авторам</div></div>
+    <div class="panel stat"><div class="value">{{ fee|floatformat:"2g" }} ₽</div><div class="label">Комиссия площадки</div></div>
+</div>
+<h2 class="section-title">Самые продаваемые треки</h2>
+<table class="table panel">
+    <tr><th>Трек</th><th>Автор</th><th>Продано лицензий</th></tr>
+    {% for t in top %}
+    <tr><td>{{ t.title }}</td><td>{{ t.author.stage_name }}</td><td>{{ t.sold }}</td></tr>
+    {% empty %}
+    <tr><td colspan="3" class="muted">Продаж пока нет</td></tr>
+    {% endfor %}
+</table>
+{% endblock %}
