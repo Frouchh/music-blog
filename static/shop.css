@@ -184,3 +184,18 @@ h2.section-title { font-size: 24px; margin: 32px 0 16px; }
     .header .main-nav .nav-link span { font-size: 19px; }
     .header .search-container { width: 220px; right: 160px; }
 }
+
+.checkout-form { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+.agree { display: flex; gap: 8px; align-items: center; color: var(--muted); white-space: nowrap; }
+.agree input { width: 18px; height: 18px; accent-color: var(--accent); }
+.btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+
+/* Столбчатая диаграмма начислений */
+.chart { display: flex; align-items: flex-end; gap: 18px; height: 230px; padding-top: 34px; }
+.chart-col { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 6px; }
+.chart-bar { width: 60%; min-height: 3px; border-radius: 8px 8px 0 0; background: linear-gradient(180deg, var(--accent), var(--violet)); }
+.chart-value { font-size: 13px; color: var(--muted); }
+.chart-label { font-size: 13px; color: var(--muted); }
+.rules h2 { margin: 26px 0 10px; font-size: 22px; }
+.rules p, .rules li { line-height: 1.6; margin-bottom: 8px; }
+.rules ul { padding-left: 22px; }

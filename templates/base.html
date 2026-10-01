@@ -93,6 +93,7 @@
                     <nav class="footer-nav">
                         <a href="{% url 'catalog' %}" class="footer-nav-link">Каталог</a>
                         <a href="{% url 'cart' %}" class="footer-nav-link">Корзина</a>
+                        <a href="{% url 'rules' %}" class="footer-nav-link">Правила и лицензии</a>
                         {% if user.is_authenticated %}
                         <a href="{% url 'profile' %}" class="footer-nav-link">Мои покупки</a>
                         <form action="{% url 'logout' %}" method="post" class="inline-form">

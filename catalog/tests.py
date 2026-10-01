@@ -11,7 +11,7 @@ class UploadTests(ShopTestCase):
         self.client.force_login(self.author_user)
         data = {'title': 'New', 'genre': self.track.genre_id, 'description': '',
                 'audio_file': SimpleUploadedFile(name, content),
-                'lic-TOTAL_FORMS': 3, 'lic-INITIAL_FORMS': 0}
+                'rights_confirmed': 'on', 'lic-TOTAL_FORMS': 3, 'lic-INITIAL_FORMS': 0}
         for i, lt in enumerate(LicenseType.objects.all()):
             data[f'lic-{i}-license_type'] = lt.pk
             data[f'lic-{i}-price'] = 100 * (i + 1)
@@ -26,6 +26,11 @@ class UploadTests(ShopTestCase):
     def test_too_big(self):
         response = self.upload('big.wav', wav_bytes())
         self.assertContains(response, 'Размер файла не должен превышать 50 МБ')
+
+    def test_rights_confirmation_required(self):
+        self.client.force_login(self.author_user)
+        response = self.client.post(reverse('upload_track'), {'title': 'X'})
+        self.assertContains(response, 'Без подтверждения прав трек не может быть опубликован')
 
     def test_upload_goes_to_moderation(self):
         response = self.upload('new.wav', wav_bytes(2))
@@ -46,6 +51,18 @@ class CatalogTests(ShopTestCase):
         self.assertNotContains(response, 'Night Drive')
         response = self.client.get(reverse('catalog'), {'price_max': 200, 'q': 'night'})
         self.assertContains(response, 'Night Drive')
+
+    def test_filter_by_license(self):
+        from catalog.models import LicenseType, TrackLicense
+        exclusive = LicenseType.objects.get(is_exclusive=True)
+        response = self.client.get(reverse('catalog'), {'license': exclusive.pk})
+        self.assertContains(response, 'Night Drive')
+        TrackLicense.objects.filter(license_type=exclusive).update(is_available=False)
+        response = self.client.get(reverse('catalog'), {'license': exclusive.pk})
+        self.assertNotContains(response, 'Night Drive')
+
+    def test_rules_page(self):
+        self.assertContains(self.client.get(reverse('rules')), 'Эксклюзивная')
 
     def test_pending_track_hidden(self):
         Track.objects.update(status=Status.objects.get(name=Status.PENDING))

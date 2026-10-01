@@ -1,8 +1,12 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from datetime import timedelta
+
 from django.db.models import Avg, Count, Min, Q, Sum
+from django.db.models.functions import TruncMonth
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from accounts.decorators import role_required
@@ -34,6 +38,9 @@ def catalog(request):
                                    Q(author__stage_name__icontains=data['q']))
         if data['genre']:
             tracks = tracks.filter(genre_id=data['genre'])
+        if data['license']:
+            tracks = tracks.filter(licenses__license_type_id=data['license'],
+                                   licenses__is_available=True)
         if data['price_min'] is not None:
             tracks = tracks.filter(price_from__gte=data['price_min'])
         if data['price_max'] is not None:
@@ -45,7 +52,13 @@ def catalog(request):
     page = Paginator(tracks, 12).get_page(request.GET.get('page'))
     return render(request, 'catalog/catalog.html', {
         'form': form, 'page': page, 'genres': Genre.objects.all(),
+        'license_types': LicenseType.objects.all(),
     })
+
+
+def rules(request):
+    """Правила площадки и лицензионные соглашения."""
+    return render(request, 'catalog/rules.html', {'license_types': LicenseType.objects.all()})
 
 
 def track_detail(request, pk):
@@ -153,6 +166,22 @@ def create_album(request):
     return render(request, 'catalog/album_form.html', {'form': form})
 
 
+def sales_chart(author, months=6):
+    """Начисления автора по месяцам для столбчатой диаграммы кабинета."""
+    today = timezone.localdate().replace(day=1)
+    starts = []
+    for _ in range(months):
+        starts.insert(0, today)
+        today = (today - timedelta(days=1)).replace(day=1)
+    rows = (Royalty.objects.filter(author=author, created_at__date__gte=starts[0])
+            .annotate(month=TruncMonth('created_at')).values('month')
+            .annotate(total=Sum('amount')))
+    by_month = {r['month'].date(): r['total'] for r in rows}
+    peak = max(by_month.values(), default=0) or 1
+    return [{'label': m.strftime('%m.%Y'), 'total': by_month.get(m, 0),
+             'height': int(by_month.get(m, 0) / peak * 100)} for m in starts]
+
+
 @login_required
 @role_required('author')
 def author_tracks(request):
@@ -162,8 +191,9 @@ def author_tracks(request):
               .annotate(sales=Count('licenses__orderitem__royalty'),
                         earned=Sum('licenses__orderitem__royalty__amount')))
     totals = Royalty.objects.filter(author=author).aggregate(cnt=Count('id'), sum=Sum('amount'))
+    chart = sales_chart(author)
     return render(request, 'catalog/author_tracks.html', {
-        'author': author, 'tracks': tracks, 'totals': totals,
+        'author': author, 'tracks': tracks, 'totals': totals, 'chart': chart,
         'albums': author.albums.annotate(cnt=Count('tracks')),
         'royalties': Royalty.objects.filter(author=author)
                      .select_related('order_item__track_license__track')[:10],

@@ -14,6 +14,17 @@
     <a class="btn btn-secondary" href="{% url 'payouts' %}">Выплаты и реквизиты</a>
 </div>
 
+<h2 class="section-title">Начисления за 6 месяцев</h2>
+<div class="panel chart">
+    {% for bar in chart %}
+    <div class="chart-col">
+        <div class="chart-value">{{ bar.total|floatformat:"0g" }} ₽</div>
+        <div class="chart-bar" style="height: {{ bar.height }}%"></div>
+        <div class="chart-label">{{ bar.label }}</div>
+    </div>
+    {% endfor %}
+</div>
+
 <h2 class="section-title">Мои треки</h2>
 <table class="table panel">
     <tr><th>Название</th><th>Жанр</th><th>Статус</th><th>Продажи</th><th>Доход</th><th></th></tr>

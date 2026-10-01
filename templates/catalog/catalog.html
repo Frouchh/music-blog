@@ -15,6 +15,14 @@
                 {% endfor %}
             </select>
         </label>
+        <label>Вид лицензии
+            <select name="license">
+                <option value="">Любая</option>
+                {% for lt in license_types %}
+                <option value="{{ lt.pk }}" {% if request.GET.license == lt.pk|stringformat:"s" %}selected{% endif %}>{{ lt.name }}</option>
+                {% endfor %}
+            </select>
+        </label>
         <label>Цена, ₽</label>
         <div class="price-range">
             <input type="number" name="price_min" min="0" placeholder="от" value="{{ request.GET.price_min }}">

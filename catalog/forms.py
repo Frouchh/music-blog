@@ -7,6 +7,10 @@ from .models import Album, Review, Track, TrackLicense
 
 
 class TrackUploadForm(forms.ModelForm):
+    rights_confirmed = forms.BooleanField(
+        label='Подтверждаю, что являюсь автором или правообладателем трека',
+        error_messages={'required': 'Без подтверждения прав трек не может быть опубликован'})
+
     class Meta:
         model = Track
         fields = ['title', 'genre', 'album', 'description', 'cover', 'audio_file']
@@ -51,6 +55,7 @@ class CatalogFilterForm(forms.Form):
 
     q = forms.CharField(required=False, label='Поиск')
     genre = forms.IntegerField(required=False)
+    license = forms.IntegerField(required=False)
     price_min = forms.DecimalField(required=False, min_value=0, label='Цена от')
     price_max = forms.DecimalField(required=False, min_value=0, label='до')
     sort = forms.ChoiceField(required=False, choices=SORT_CHOICES)

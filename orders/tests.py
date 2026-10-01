@@ -18,7 +18,7 @@ class PurchaseTests(ShopTestCase):
         """Полный сценарий: корзина → оформление → тестовая оплата."""
         self.client.force_login(self.buyer)
         self.client.post(reverse('cart_add'), {'license_id': self.licenses[license_name].pk})
-        response = self.client.post(reverse('checkout'))
+        response = self.client.post(reverse('checkout'), {'agree': 'on'})
         log = PaymentLog.objects.latest('created_at')
         self.assertRedirects(response, reverse('test_payment', args=[log.external_id]))
         self.client.post(reverse('test_payment', args=[log.external_id]), {'result': result})
@@ -59,6 +59,21 @@ class PurchaseTests(ShopTestCase):
         order, _ = self.buy('Личная')
         TrackLicense.objects.filter(pk=self.licenses['Личная'].pk).update(price=500)
         self.assertEqual(order.items.get().price, Decimal('149'))
+
+    def test_checkout_requires_agreement(self):
+        self.client.force_login(self.buyer)
+        self.client.post(reverse('cart_add'), {'license_id': self.licenses['Личная'].pk})
+        response = self.client.post(reverse('checkout'))
+        self.assertRedirects(response, reverse('cart'))
+        self.assertFalse(Order.objects.exists())
+
+    def test_purchase_email(self):
+        from django.core import mail
+        with self.captureOnCommitCallbacks(execute=True):
+            self.buy('Личная')
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn('Night Drive', mail.outbox[0].body)
+        self.assertEqual(mail.outbox[0].to, ['buyer@test.ru'])
 
     def test_empty_cart_checkout(self):
         self.client.force_login(self.buyer)
