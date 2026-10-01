@@ -1,6 +1,15 @@
 {% extends 'base.html' %}
 {% load humanize %}
 {% block title %}Корзина{% endblock %}
+{% block scripts %}
+<script>
+// Кнопка оплаты активна только после согласия с соглашением
+const agree = document.getElementById('agree');
+if (agree) agree.addEventListener('change', () => {
+    document.getElementById('payButton').disabled = !agree.checked;
+});
+</script>
+{% endblock %}
 {% block content %}
 <h1 class="page-title">Корзина</h1>
 {% if items %}
@@ -27,8 +36,10 @@
             Данные карты магазину не передаются.</p>
     </div>
     {% if user.is_authenticated %}
-    <form method="post" action="{% url 'checkout' %}">{% csrf_token %}
-        <button class="btn">Перейти к оплате</button>
+    <form method="post" action="{% url 'checkout' %}" class="checkout-form">{% csrf_token %}
+        <label class="agree"><input type="checkbox" name="agree" id="agree" required>
+            Принимаю <a href="{% url 'rules' %}" target="_blank">лицензионное соглашение</a></label>
+        <button class="btn" id="payButton" disabled>Перейти к оплате</button>
     </form>
     {% else %}
     <a class="btn" href="{% url 'login' %}?next={% url 'cart' %}">Войдите для оформления</a>

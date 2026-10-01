@@ -11,7 +11,7 @@ class UploadTests(ShopTestCase):
         self.client.force_login(self.author_user)
         data = {'title': 'New', 'genre': self.track.genre_id, 'description': '',
                 'audio_file': SimpleUploadedFile(name, content),
-                'lic-TOTAL_FORMS': 3, 'lic-INITIAL_FORMS': 0}
+                'rights_confirmed': 'on', 'lic-TOTAL_FORMS': 3, 'lic-INITIAL_FORMS': 0}
         for i, lt in enumerate(LicenseType.objects.all()):
             data[f'lic-{i}-license_type'] = lt.pk
             data[f'lic-{i}-price'] = 100 * (i + 1)
@@ -26,6 +26,11 @@ class UploadTests(ShopTestCase):
     def test_too_big(self):
         response = self.upload('big.wav', wav_bytes())
         self.assertContains(response, 'Размер файла не должен превышать 50 МБ')
+
+    def test_rights_confirmation_required(self):
+        self.client.force_login(self.author_user)
+        response = self.client.post(reverse('upload_track'), {'title': 'X'})
+        self.assertContains(response, 'Без подтверждения прав трек не может быть опубликован')
 
     def test_upload_goes_to_moderation(self):
         response = self.upload('new.wav', wav_bytes(2))
@@ -47,6 +52,18 @@ class CatalogTests(ShopTestCase):
         response = self.client.get(reverse('catalog'), {'price_max': 200, 'q': 'night'})
         self.assertContains(response, 'Night Drive')
 
+    def test_filter_by_license(self):
+        from catalog.models import LicenseType, TrackLicense
+        exclusive = LicenseType.objects.get(is_exclusive=True)
+        response = self.client.get(reverse('catalog'), {'license': exclusive.pk})
+        self.assertContains(response, 'Night Drive')
+        TrackLicense.objects.filter(license_type=exclusive).update(is_available=False)
+        response = self.client.get(reverse('catalog'), {'license': exclusive.pk})
+        self.assertNotContains(response, 'Night Drive')
+
+    def test_rules_page(self):
+        self.assertContains(self.client.get(reverse('rules')), 'Эксклюзивная')
+
     def test_pending_track_hidden(self):
         Track.objects.update(status=Status.objects.get(name=Status.PENDING))
         self.assertNotContains(self.client.get(reverse('catalog')), 'Night Drive')
@@ -63,3 +80,25 @@ class CatalogTests(ShopTestCase):
     def test_buyer_has_no_admin_access(self):
         self.client.force_login(self.buyer)
         self.assertEqual(self.client.get(reverse('moderation_queue')).status_code, 403)
+
+
+class AuthorCabinetTests(ShopTestCase):
+    def test_edit_track(self):
+        self.client.force_login(self.author_user)
+        self.client.post(reverse('edit_track', args=[self.track.pk]),
+                         {'title': 'Night Drive 2', 'genre': self.track.genre_id, 'description': 'new'})
+        self.track.refresh_from_db()
+        self.assertEqual(self.track.title, 'Night Drive 2')
+
+    def test_foreign_track_cannot_be_edited(self):
+        from accounts.models import AuthorProfile, Role, User
+        user = User.objects.create_user('a2', 'a2@test.ru', 'Pass-12345',
+                                        role=Role.objects.get(name=Role.AUTHOR))
+        AuthorProfile.objects.create(user=user, stage_name='Other')
+        self.client.force_login(user)
+        self.assertEqual(self.client.get(reverse('edit_track', args=[self.track.pk])).status_code, 404)
+
+    def test_create_album(self):
+        self.client.force_login(self.author_user)
+        self.client.post(reverse('create_album'), {'title': 'First EP'})
+        self.assertTrue(self.author.albums.filter(title='First EP').exists())

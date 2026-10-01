@@ -26,6 +26,9 @@ def checkout(request):
     if not items:
         messages.error(request, 'Корзина пуста')
         return redirect('cart')
+    if not request.POST.get('agree'):
+        messages.error(request, 'Необходимо принять лицензионное соглашение')
+        return redirect('cart')
     with transaction.atomic():
         order = Order.objects.create(buyer=request.user,
                                      total=sum(lic.price for lic in items))

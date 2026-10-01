@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Изменение трека{% endblock %}
+{% block content %}
+<div class="panel" style="max-width:760px;margin:0 auto">
+    <h1 class="page-title">Изменение трека: {{ track.title }}</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% include 'includes/form_fields.html' %}
+        <p class="helptext" style="margin-bottom:14px">Аудиофайл не заменяется. Чтобы снять трек с продажи,
+            отключите все лицензии на странице «Цены».</p>
+        <div style="display:flex;gap:12px">
+            <button class="btn">Сохранить</button>
+            <a class="btn btn-secondary" href="{% url 'author_tracks' %}">Назад</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

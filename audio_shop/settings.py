@@ -119,4 +119,15 @@ PLATFORM_FEE = Decimal('0.10')             # комиссия площадки 1
 YOOKASSA_SHOP_ID = os.environ.get('YOOKASSA_SHOP_ID')
 YOOKASSA_SECRET_KEY = os.environ.get('YOOKASSA_SECRET_KEY')
 
+# Почта: письмо покупателю после оплаты. Без SMTP письма выводятся в консоль.
+SITE_URL = os.environ.get('SITE_URL', 'http://127.0.0.1:8000')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'shop@audio-content.local')
+EMAIL_HOST = os.environ.get('EMAIL_HOST', '')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '465'))
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+EMAIL_USE_SSL = True
+EMAIL_BACKEND = ('django.core.mail.backends.smtp.EmailBackend' if EMAIL_HOST
+                 else 'django.core.mail.backends.console.EmailBackend')
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

@@ -3,6 +3,7 @@ from datetime import timedelta
 from decimal import Decimal
 
 from django.conf import settings
+from django.core.mail import send_mail
 from django.db import transaction
 from django.db.models import F
 from django.utils import timezone
@@ -41,3 +42,17 @@ def complete_order(order):
         # 3. Эксклюзивная лицензия снимает трек с продажи
         if lic.license_type.is_exclusive:
             TrackLicense.objects.filter(track=lic.track).update(is_available=False)
+    # 4. Письмо покупателю со ссылкой на раздел «Мои покупки» – после фиксации транзакции
+    transaction.on_commit(lambda: send_purchase_email(order))
+
+
+def send_purchase_email(order):
+    lines = [f'{item.track_license.track.title} – {item.track_license.license_type.name}'
+             for item in order.items.select_related('track_license__track',
+                                                    'track_license__license_type')]
+    send_mail(
+        subject=f'Заказ №{order.pk} оплачен',
+        message='Спасибо за покупку!\n\n' + '\n'.join(lines) +
+                f'\n\nСкачать файлы можно в разделе «Мои покупки»: {settings.SITE_URL}/accounts/profile/\n'
+                'Ссылка действует 24 часа, не более 3 скачиваний.',
+        from_email=None, recipient_list=[order.buyer.email], fail_silently=True)

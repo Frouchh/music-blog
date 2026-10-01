@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}Новый альбом{% endblock %}
+{% block content %}
+<div class="panel form-narrow">
+    <h1 class="page-title">Новый альбом</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% include 'includes/form_fields.html' %}
+        <p class="helptext" style="margin-bottom:14px">Треки добавляются в альбом при загрузке или в форме изменения трека.</p>
+        <button class="btn">Создать</button>
+    </form>
+</div>
+{% endblock %}
