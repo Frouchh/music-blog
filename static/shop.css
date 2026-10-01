@@ -240,8 +240,10 @@ h2.section-title { font-size: 24px; margin: 32px 0 16px; }
 .tile-title { font-size: 20px; font-weight: 700; }
 
 @media (max-width: 1600px) {
-    .header .main-nav { left: 30px; gap: 16px; }
+    .header .main-nav { left: 48px; gap: 14px; }
     .header .main-nav .nav-link img { width: 28px; height: 28px; }
     .header .main-nav .nav-link span.nav-text { font-size: 16px; }
     .header .search-container { width: 200px; right: 160px; }
 }
+
+.text-wrapper-22.brand { top: 50%; transform: translateY(-50%); }
