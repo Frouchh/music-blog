@@ -10,6 +10,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from accounts.decorators import role_required
+from accounts.models import AuthorProfile
 from orders.models import OrderItem
 from royalties.models import Royalty
 
@@ -23,7 +24,8 @@ def published_tracks():
     return (Track.objects.filter(status__name=Status.PUBLISHED)
             .select_related('author', 'genre')
             .annotate(price_from=Min('licenses__price', filter=Q(licenses__is_available=True)),
-                      rating=Avg('reviews__rating'))
+                      rating=Avg('reviews__rating'),
+                      sold=Count('licenses__orderitem__royalty', distinct=True))
             .order_by('-created_at'))
 
 
@@ -45,14 +47,48 @@ def catalog(request):
             tracks = tracks.filter(price_from__gte=data['price_min'])
         if data['price_max'] is not None:
             tracks = tracks.filter(price_from__lte=data['price_max'])
-        order = {'price': 'price_from', '-price': '-price_from',
-                 'rating': '-rating'}.get(data['sort'])
+        order = {'price': 'price_from', '-price': '-price_from', 'rating': '-rating',
+                 'popular': '-sold'}.get(data['sort'])
         if order:
             tracks = tracks.order_by(order)
     page = Paginator(tracks, 12).get_page(request.GET.get('page'))
     return render(request, 'catalog/catalog.html', {
         'form': form, 'page': page, 'genres': Genre.objects.all(),
         'license_types': LicenseType.objects.all(),
+    })
+
+
+def genres(request):
+    """Жанры с количеством опубликованных треков."""
+    items = Genre.objects.annotate(
+        cnt=Count('track', filter=Q(track__status__name=Status.PUBLISHED))).order_by('-cnt', 'name')
+    return render(request, 'catalog/genres.html', {'genres': items})
+
+
+def authors(request):
+    """Авторы, у которых есть опубликованные треки."""
+    items = (AuthorProfile.objects
+             .annotate(cnt=Count('tracks', filter=Q(tracks__status__name=Status.PUBLISHED)))
+             .filter(cnt__gt=0).order_by('stage_name'))
+    return render(request, 'catalog/authors.html', {'authors': items})
+
+
+def author_page(request, pk):
+    author = get_object_or_404(AuthorProfile, pk=pk)
+    return render(request, 'catalog/author_page.html', {
+        'author': author,
+        'tracks': published_tracks().filter(author=author),
+        'albums': author.albums.annotate(
+            cnt=Count('tracks', filter=Q(tracks__status__name=Status.PUBLISHED))).filter(cnt__gt=0),
+    })
+
+
+def for_authors(request):
+    """Условия для авторов: как начать продавать музыку."""
+    return render(request, 'catalog/for_authors.html', {
+        'license_types': LicenseType.objects.all(),
+        'authors_count': AuthorProfile.objects.count(),
+        'tracks_count': Track.objects.filter(status__name=Status.PUBLISHED).count(),
     })
 
 
@@ -65,7 +101,10 @@ def track_detail(request, pk):
     track = get_object_or_404(Track.objects.select_related('author', 'genre', 'status'), pk=pk)
     user = request.user
     is_owner = user.is_authenticated and track.author.user_id == user.id
-    if track.status.name != Status.PUBLISHED and not (is_owner or user.is_authenticated and user.is_shop_admin):
+    is_buyer = user.is_authenticated and OrderItem.objects.filter(
+        order__buyer=user, order__status='paid', track_license__track=track).exists()
+    if track.status.name != Status.PUBLISHED and not (is_owner or is_buyer or
+                                                      user.is_authenticated and user.is_shop_admin):
         messages.error(request, 'Трек недоступен')
         return redirect('catalog')
 

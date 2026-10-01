@@ -33,7 +33,7 @@
         <td><a href="{% url 'track_detail' track.pk %}">{{ track.title }}</a></td>
         <td>{{ track.genre.name }}</td>
         <td>
-            <span class="badge {% if track.status.name == 'Опубликован' %}badge-ok{% elif track.status.name == 'На модерации' %}badge-wait{% else %}badge-bad{% endif %}">{{ track.status.name }}</span>
+            <span class="badge {% if track.status.name == 'Опубликован' %}badge-ok{% elif track.status.name == 'На модерации' %}badge-wait{% elif track.status.name == 'Продан эксклюзивно' %}badge-gold{% else %}badge-bad{% endif %}">{{ track.status.name }}</span>
             {% if track.moderation_comment %}<div class="helptext">{{ track.moderation_comment }}</div>{% endif %}
         </td>
         <td>{{ track.sales }}</td>

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}{{ author.stage_name }} – Soundahahahha{% endblock %}
+{% block content %}
+<h1 class="page-title">{{ author.stage_name }}</h1>
+{% if albums %}
+<h2 class="section-title">Альбомы</h2>
+<div class="tile-grid">
+    {% for album in albums %}
+    <a class="tile" href="{% url 'album_detail' album.pk %}">
+        <span class="tile-title">{{ album.title }}</span>
+        <span class="muted">Треков: {{ album.cnt }}</span>
+    </a>
+    {% endfor %}
+</div>
+{% endif %}
+<h2 class="section-title">Треки</h2>
+<div class="track-grid">
+    {% for track in tracks %}
+        {% include 'catalog/_track_card.html' %}
+    {% empty %}
+        <p class="muted">У автора пока нет треков в продаже.</p>
+    {% endfor %}
+</div>
+{% endblock %}

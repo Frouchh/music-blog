@@ -27,6 +27,24 @@ class UploadTests(ShopTestCase):
         response = self.upload('big.wav', wav_bytes())
         self.assertContains(response, 'Размер файла не должен превышать 50 МБ')
 
+    def test_preview_without_ffmpeg(self):
+        import builtins
+        real_import = builtins.__import__
+
+        def no_pydub(name, *args, **kwargs):
+            if name.startswith('pydub'):
+                raise ImportError('нет FFmpeg')
+            return real_import(name, *args, **kwargs)
+
+        from unittest import mock
+        with mock.patch('builtins.__import__', side_effect=no_pydub):
+            self.upload('long.wav', wav_bytes(40))
+        track = Track.objects.get(title='New')
+        self.assertTrue(track.preview_file.name.endswith('.wav'))
+        import wave
+        with wave.open(track.preview_file.path) as w:
+            self.assertEqual(round(w.getnframes() / w.getframerate()), 30)
+
     def test_rights_confirmation_required(self):
         self.client.force_login(self.author_user)
         response = self.client.post(reverse('upload_track'), {'title': 'X'})

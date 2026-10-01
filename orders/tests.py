@@ -49,8 +49,14 @@ class PurchaseTests(ShopTestCase):
         self.assertEqual(AuthorProfile.objects.get(pk=self.author.pk).balance, Decimal('891.00'))
 
     def test_exclusive_license_withdraws_track(self):
+        from catalog.models import Status
         self.buy('Эксклюзивная')
         self.assertFalse(TrackLicense.objects.filter(track=self.track, is_available=True).exists())
+        self.track.refresh_from_db()
+        self.assertEqual(self.track.status.name, Status.SOLD_EXCLUSIVE)
+        self.assertNotContains(self.client.get(reverse('catalog')), 'Night Drive')
+        # покупатель по-прежнему видит купленный трек
+        self.assertEqual(self.client.get(reverse('track_detail', args=[self.track.pk])).status_code, 200)
         response = self.client.post(reverse('cart_add'),
                                     {'license_id': self.licenses['Личная'].pk})
         self.assertEqual(response.status_code, 404)

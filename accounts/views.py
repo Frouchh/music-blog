@@ -10,7 +10,7 @@ from .forms import LoginForm, RegisterForm
 
 
 def register(request):
-    form = RegisterForm(request.POST or None)
+    form = RegisterForm(request.POST or None, initial={'role': request.GET.get('role', 'buyer')})
     if request.method == 'POST' and form.is_valid():
         user = form.save()
         login(request, user)

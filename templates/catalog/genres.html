@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Жанры – Soundahahahha{% endblock %}
+{% block content %}
+<h1 class="page-title">Жанры</h1>
+<div class="tile-grid">
+    {% for genre in genres %}
+    <a class="tile" href="{% url 'catalog' %}?genre={{ genre.pk }}">
+        <img src="{% static 'nav-genres.svg' %}" alt="">
+        <span class="tile-title">{{ genre.name }}</span>
+        <span class="muted">Треков: {{ genre.cnt }}</span>
+    </a>
+    {% endfor %}
+</div>
+{% endblock %}

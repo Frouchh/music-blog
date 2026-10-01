@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{% block title %}Продажа аудио контента{% endblock %}</title>
+    <title>{% block title %}Soundahahahha – музыка с лицензией{% endblock %}</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'style.css' %}" />
     <link rel="stylesheet" href="{% static 'shop.css' %}" />
@@ -22,29 +22,44 @@
                     <img class="streamline-flex-2" src="{% static 'streamline-flex_music-equalizer-solid.svg' %}" alt="" />
                     <img class="streamline-flex-3" src="{% static 'streamline-flex_music-equalizer-solid.svg' %}" alt="" />
                 </div>
-                <span class="text-wrapper-4">Аудио<br>контент</span>
+                <span class="text-wrapper-4 brand">Soundahahahha</span>
             </a>
 
             <nav class="main-nav">
-                <a href="{% url 'catalog' %}" class="nav-link">
+                {% with name=request.resolver_match.url_name sort=request.GET.sort %}
+                <a href="{% url 'catalog' %}" class="nav-link{% if name == 'catalog' and sort != 'popular' %} active{% endif %}">
                     <img src="{% static 'tdesign_tree-catalog-filled.svg' %}" alt="" />
-                    <span class="text-wrapper">Каталог</span>
+                    <span class="nav-text">Каталог</span>
                 </a>
-                <a href="{% url 'catalog' %}?sort=new" class="nav-link">
-                    <img src="{% static 'entrypo_new.svg' %}" alt="" />
-                    <span class="text-wrapper-2">Новинки</span>
+                <a href="{% url 'catalog' %}?sort=popular" class="nav-link{% if sort == 'popular' %} active{% endif %}">
+                    <img src="{% static 'nav-popular.svg' %}" alt="" />
+                    <span class="nav-text">Популярное</span>
                 </a>
-                {% if user.is_authenticated and user.is_author %}
-                <a href="{% url 'author_tracks' %}" class="nav-link">
-                    <img src="{% static 'ix_calendar.svg' %}" alt="" />
-                    <span class="text-wrapper-3">Кабинет автора</span>
+                <a href="{% url 'genres' %}" class="nav-link{% if name == 'genres' %} active{% endif %}">
+                    <img src="{% static 'nav-genres.svg' %}" alt="" />
+                    <span class="nav-text">Жанры</span>
                 </a>
-                {% endif %}
+                <a href="{% url 'authors' %}" class="nav-link{% if name == 'authors' or name == 'author_page' %} active{% endif %}">
+                    <img src="{% static 'nav-authors.svg' %}" alt="" />
+                    <span class="nav-text">Авторы</span>
+                </a>
                 {% if user.is_authenticated and user.is_shop_admin %}
-                <a href="{% url 'moderation_queue' %}" class="nav-link">
-                    <span class="text-wrapper accent">Администрирование</span>
+                <a href="{% url 'moderation_queue' %}" class="nav-link{% if 'moderation' in request.path or 'royalties/admin' in request.path %} active{% endif %}">
+                    <img src="{% static 'nav-admin.svg' %}" alt="" />
+                    <span class="nav-text">Управление</span>
+                </a>
+                {% elif user.is_authenticated and user.is_author %}
+                <a href="{% url 'author_tracks' %}" class="nav-link{% if name == 'author_tracks' %} active{% endif %}">
+                    <img src="{% static 'nav-cabinet.svg' %}" alt="" />
+                    <span class="nav-text">Кабинет</span>
+                </a>
+                {% else %}
+                <a href="{% url 'for_authors' %}" class="nav-link{% if name == 'for_authors' %} active{% endif %}">
+                    <img src="{% static 'nav-for-authors.svg' %}" alt="" />
+                    <span class="nav-text">Авторам</span>
                 </a>
                 {% endif %}
+                {% endwith %}
             </nav>
 
             <form class="search-container" action="{% url 'catalog' %}" method="get">
@@ -58,7 +73,7 @@
                     <img class="user" src="{% static 'User.svg' %}" alt="Профиль" />
                 </a>
                 <a href="{% url 'cart' %}" class="panel-slot slot-1 cart-link" title="Корзина">
-                    🛒<span class="cart-count" id="cartCount">{{ cart_count }}</span>
+                    <img src="{% static 'cart.svg' %}" alt="Корзина" class="cart-icon"><span class="cart-count" id="cartCount">{{ cart_count }}</span>
                 </a>
                 {% if user.is_authenticated and user.is_author %}
                 <a href="{% url 'upload_track' %}" class="panel-slot slot-2" title="Загрузить трек">
@@ -71,6 +86,11 @@
         </header>
 
         <main class="shop-main">
+            {% if request.resolver_match.url_name != 'catalog' %}
+            <a href="{% url 'catalog' %}" class="back-link" id="backLink" title="Вернуться на предыдущую страницу">
+                <img src="{% static 'arrow-back.svg' %}" alt=""> Назад
+            </a>
+            {% endif %}
             {% for message in messages %}
             <div class="flash flash-{{ message.tags }}">{{ message }}</div>
             {% endfor %}
@@ -87,7 +107,7 @@
                         <img class="streamline-flex-5" src="{% static 'streamline-flex_music-equalizer-solid.svg' %}" alt="" />
                         <img class="streamline-flex-6" src="{% static 'streamline-flex_music-equalizer-solid.svg' %}" alt="" />
                     </div>
-                    <span class="text-wrapper-22">Аудио<br />контент</span>
+                    <span class="text-wrapper-22 brand">Soundahahahha</span>
                 </div>
                 <div class="footer-nav-wrapper">
                     <nav class="footer-nav">
@@ -109,6 +129,13 @@
             </div>
         </footer>
     </div>
+    <script>
+    // «Назад» возвращает на предыдущую страницу сайта, иначе – в каталог
+    const back = document.getElementById('backLink');
+    if (back && document.referrer.startsWith(location.origin) && history.length > 1) {
+        back.addEventListener('click', (e) => { e.preventDefault(); history.back(); });
+    }
+    </script>
     {% block scripts %}{% endblock %}
 </body>
 </html>

@@ -50,7 +50,7 @@ class ReviewForm(forms.ModelForm):
 
 
 class CatalogFilterForm(forms.Form):
-    SORT_CHOICES = [('new', 'Сначала новые'), ('price', 'Сначала дешёвые'),
+    SORT_CHOICES = [('new', 'Сначала новые'), ('popular', 'Популярные'), ('price', 'Сначала дешёвые'),
                     ('-price', 'Сначала дорогие'), ('rating', 'По рейтингу')]
 
     q = forms.CharField(required=False, label='Поиск')
