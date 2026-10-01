@@ -176,3 +176,11 @@ h2.section-title { font-size: 24px; margin: 32px 0 16px; }
     font: 15px 'Inter', sans-serif;
 }
 .table input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--accent); }
+
+/* Шапка на экранах уже 1600 px: меню и поиск не перекрываются */
+@media (max-width: 1600px) {
+    .header .main-nav { left: 290px; gap: 18px; }
+    .header .main-nav .nav-link img { width: 34px; height: 34px; }
+    .header .main-nav .nav-link span { font-size: 19px; }
+    .header .search-container { width: 220px; right: 160px; }
+}
